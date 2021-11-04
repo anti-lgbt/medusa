@@ -18,28 +18,19 @@ type UserData struct {
 }
 
 type User struct {
-	ID         int64                `json:"id" gorm:"primaryKey"`
-	UID        string               `json:"uid" gorm:"type:character varying(20);not null"`
-	Email      string               `json:"email" gorm:"type:character varying(50);not null;uniqueIndex"`
-	Password   string               `json:"-" gorm:"type:character varying;not null"`
-	FirstName  string               `json:"first_name" gorm:"type:character varying(50);not null;index"`
-	LastName   string               `json:"last_name" gorm:"type:character varying(50);not null;index"`
-	Bio        datatypes.NullString `json:"bio" gorm:"type:character varying"`
-	State      types.UserState      `json:"state" gorm:"type:character varying(10):not null;index"`
-	Role       types.UserRole       `json:"role" gorm:"type:character varying(10):not null;index"`
-	Avatar     datatypes.NullString `json:"-" gorm:"type:character varying"`
-	Data       sql.NullString       `json:"-" gorm:"type:json"`
-	CreatedAt  time.Time            `json:"created_at" gorm:"type:timestamp(0);not null;index"`
-	UpdatedAt  time.Time            `json:"updated_at" gorm:"type:timestamp(0);not null;index"`
-	Populars   []*Popular           `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	Activities []*Activity          `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	Labels     []*Label             `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	Musics     []*Music             `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	Albums     []*Album             `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	Likes      []*Like              `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	Comments   []*Comment           `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	Replys     []*Reply             `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	Codes      []*Code              `json:"-" gorm:"constraint:OnDelete:CASCADE"`
+	ID        int64                `json:"id" gorm:"primaryKey"`
+	UID       string               `json:"uid" gorm:"type:character varying(20);not null"`
+	Email     string               `json:"email" gorm:"type:character varying(50);not null;uniqueIndex"`
+	Password  string               `json:"-" gorm:"type:character varying;not null"`
+	FirstName string               `json:"first_name" gorm:"type:character varying(50);not null;index"`
+	LastName  string               `json:"last_name" gorm:"type:character varying(50);not null;index"`
+	Bio       datatypes.NullString `json:"bio" gorm:"type:character varying"`
+	State     types.UserState      `json:"state" gorm:"type:character varying(10):not null;index"`
+	Role      types.UserRole       `json:"role" gorm:"type:character varying(10):not null;index"`
+	Avatar    datatypes.NullString `json:"-" gorm:"type:character varying"`
+	Data      sql.NullString       `json:"-" gorm:"type:json"`
+	CreatedAt time.Time            `json:"created_at" gorm:"type:timestamp(0);not null;index"`
+	UpdatedAt time.Time            `json:"updated_at" gorm:"type:timestamp(0);not null;index"`
 }
 
 func (u *User) Language() string {
