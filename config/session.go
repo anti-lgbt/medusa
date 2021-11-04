@@ -10,7 +10,7 @@ import (
 
 var SessionStore *session.Store
 
-func InitSessionStore() error {
+func InitSessionStore() {
 	storage := redis.New(redis.Config{
 		URL:   os.Getenv("REDIS_URL"),
 		Reset: false,
@@ -22,6 +22,4 @@ func InitSessionStore() error {
 		CookiePath:     "/",
 		CookieHTTPOnly: true,
 	})
-
-	return nil
 }

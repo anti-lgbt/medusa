@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 
 	"gorm.io/driver/postgres"
@@ -9,7 +10,7 @@ import (
 
 var DataBase *gorm.DB
 
-func ConnectDatabase() error {
+func ConnectDatabase() {
 	dsn := "host=" + os.Getenv("DATABASE_HOST") +
 		" port=" + os.Getenv("DATABASE_PORT") +
 		" user=" + os.Getenv("DATABASE_USER") +
@@ -21,10 +22,10 @@ func ConnectDatabase() error {
 	})
 
 	if err != nil {
-		return err
+		panic(err)
 	}
 
-	DataBase = db
+	log.Println(db, nil)
 
-	return nil
+	DataBase = db
 }

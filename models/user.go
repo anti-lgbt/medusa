@@ -18,19 +18,19 @@ type UserData struct {
 }
 
 type User struct {
-	ID        int64                `json:"id" gorm:"primaryKey"`
-	UID       string               `json:"uid" gorm:"type:character varying(20);not null"`
-	Email     string               `json:"email" gorm:"type:character varying(50);not null;uniqueIndex"`
-	Password  string               `json:"-" gorm:"type:text;not null"`
-	FirstName string               `json:"first_name" gorm:"type:character varying(50);not null;index"`
-	LastName  string               `json:"last_name" gorm:"type:character varying(50);not null;index"`
-	Bio       datatypes.NullString `json:"bio" gorm:"type:text"`
-	State     types.UserState      `json:"state" gorm:"type:character varying(10):not null;index"`
-	Role      types.UserRole       `json:"role" gorm:"type:character varying(10):not null;index"`
-	Avatar    datatypes.NullString `json:"-" gorm:"type:text"`
-	Data      sql.NullString       `json:"-" gorm:"type:text"`
-	CreatedAt time.Time            `json:"created_at" gorm:"type:timestamp(0);not null;index"`
-	UpdatedAt time.Time            `json:"updated_at" gorm:"type:timestamp(0);not null;index"`
+	ID        int64                `gorm:"primaryKey"`
+	UID       string               `gorm:"type:character varying(20);not null"`
+	Email     string               `gorm:"type:character varying(50);not null;uniqueIndex"`
+	Password  string               `gorm:"type:text;not null"`
+	FirstName string               `gorm:"type:character varying(50);not null;index"`
+	LastName  string               `gorm:"type:character varying(50);not null;index"`
+	Bio       datatypes.NullString `gorm:"type:text"`
+	State     types.UserState      `gorm:"type:character varying(10):not null;index"`
+	Role      types.UserRole       `gorm:"type:character varying(10):not null;index"`
+	Avatar    datatypes.NullString `gorm:"type:text"`
+	Data      sql.NullString       `gorm:"type:text"`
+	CreatedAt time.Time            `gorm:"type:timestamp(0);not null;index"`
+	UpdatedAt time.Time            `gorm:"type:timestamp(0);not null;index"`
 }
 
 func (u *User) Language() string {

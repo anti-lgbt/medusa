@@ -18,10 +18,7 @@ func CreateWorker(id string) engines.Worker {
 }
 
 func main() {
-	if err := config.InitializeConfig(); err != nil {
-		config.Logger.Error(err.Error())
-		return
-	}
+	config.InitializeConfig()
 
 	ARVG := os.Args[1:]
 

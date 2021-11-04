@@ -7,10 +7,7 @@ import (
 )
 
 func main() {
-	if err := config.InitializeConfig(); err != nil {
-		config.Logger.Error(err.Error())
-		return
-	}
+	config.InitializeConfig()
 
 	config.Database.AutoMigrate(
 		&models.User{},

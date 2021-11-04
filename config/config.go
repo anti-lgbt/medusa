@@ -4,15 +4,8 @@ import "gorm.io/gorm"
 
 var Database *gorm.DB
 
-func InitializeConfig() error {
+func InitializeConfig() {
 	NewLoggerService()
-
-	if err := ConnectDatabase(); err != nil {
-		return err
-	}
-	if err := InitSessionStore(); err != nil {
-		return err
-	}
-
-	return nil
+	ConnectDatabase()
+	InitSessionStore()
 }
