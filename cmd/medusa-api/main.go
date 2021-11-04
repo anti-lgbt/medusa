@@ -13,16 +13,6 @@ func main() {
 	}
 
 	config.Database.AutoMigrate(
-		&models.Activity{},
-		&models.Album{},
-		&models.Music{},
-		&models.Code{},
-		&models.Comment{},
-		&models.Reply{},
-		&models.MusicAlbum{},
-		&models.Like{},
-		&models.Label{},
-		&models.Popular{},
 		&models.User{},
 	)
 
