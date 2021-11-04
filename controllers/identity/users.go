@@ -113,9 +113,9 @@ func VerifyEmail(c *fiber.Ctx) error {
 
 	user.State = types.UserStateActive
 
-	for _, label := range user.Labels {
-		label.State = types.LabelStateVerified
-	}
+	// for _, label := range user.Labels {
+	// 	label.State = types.LabelStateVerified
+	// }
 
 	config.Database.Save(&user)
 
