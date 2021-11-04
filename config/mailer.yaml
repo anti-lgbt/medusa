@@ -1,0 +1,7 @@
+events:
+  - name: Password Reset
+    key: password_reset
+    templates:
+      en:
+        subject: Password Reset
+        template_path: templates/en/password_reset.tpl
