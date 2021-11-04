@@ -18,8 +18,8 @@ type UserData struct {
 }
 
 type User struct {
-	ID        int64                `gorm:"primaryKey"`
-	UID       string               `gorm:"type:character varying(20);not null"`
+	ID        int64                `gorm:"primaryKey;autoIncrement;not null;index"`
+	UID       string               `gorm:"type:character varying(20);not null;index"`
 	Email     string               `gorm:"type:character varying(50);not null;uniqueIndex"`
 	Password  string               `gorm:"type:text;not null"`
 	FirstName string               `gorm:"type:character varying(50);not null;index"`
