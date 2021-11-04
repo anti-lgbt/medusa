@@ -17,7 +17,10 @@ func ConnectDatabase() {
 		" password=" + os.Getenv("DATABASE_PASS") +
 		" dbname=" + os.Getenv("DATABASE_NAME") +
 		" sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+
+	var err error
+
+	DataBase, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		SkipDefaultTransaction: true,
 	})
 
@@ -25,7 +28,5 @@ func ConnectDatabase() {
 		panic(err)
 	}
 
-	log.Println(db, nil)
-
-	DataBase = db
+	log.Println(DataBase)
 }

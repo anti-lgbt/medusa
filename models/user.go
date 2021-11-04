@@ -17,6 +17,12 @@ type UserData struct {
 	IPS      []string `json:"ips"`
 }
 
+type UserAbc struct {
+	ID    int64  `gorm:"primaryKey;autoIncrement;not null;index"`
+	UID   string `gorm:"type:character varying(20);not null;index"`
+	Email string `gorm:"type:character varying(50);not null;uniqueIndex"`
+}
+
 type User struct {
 	ID        int64                `gorm:"primaryKey;autoIncrement;not null;index"`
 	UID       string               `gorm:"type:character varying(20);not null;index"`

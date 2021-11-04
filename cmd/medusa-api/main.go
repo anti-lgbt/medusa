@@ -10,7 +10,7 @@ func main() {
 	config.InitializeConfig()
 
 	config.Database.AutoMigrate(
-		&models.User{},
+		&models.UserAbc{},
 	)
 
 	r := routes.SetupRouter()
