@@ -21,14 +21,14 @@ type User struct {
 	ID        int64                `json:"id" gorm:"primaryKey"`
 	UID       string               `json:"uid" gorm:"type:character varying(20);not null"`
 	Email     string               `json:"email" gorm:"type:character varying(50);not null;uniqueIndex"`
-	Password  string               `json:"-" gorm:"type:character varying;not null"`
+	Password  string               `json:"-" gorm:"type:text;not null"`
 	FirstName string               `json:"first_name" gorm:"type:character varying(50);not null;index"`
 	LastName  string               `json:"last_name" gorm:"type:character varying(50);not null;index"`
-	Bio       datatypes.NullString `json:"bio" gorm:"type:character varying"`
+	Bio       datatypes.NullString `json:"bio" gorm:"type:text"`
 	State     types.UserState      `json:"state" gorm:"type:character varying(10):not null;index"`
 	Role      types.UserRole       `json:"role" gorm:"type:character varying(10):not null;index"`
-	Avatar    datatypes.NullString `json:"-" gorm:"type:character varying"`
-	Data      sql.NullString       `json:"-" gorm:"type:json"`
+	Avatar    datatypes.NullString `json:"-" gorm:"type:text"`
+	Data      sql.NullString       `json:"-" gorm:"type:text"`
 	CreatedAt time.Time            `json:"created_at" gorm:"type:timestamp(0);not null;index"`
 	UpdatedAt time.Time            `json:"updated_at" gorm:"type:timestamp(0);not null;index"`
 }
