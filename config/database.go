@@ -20,9 +20,7 @@ func ConnectDatabase() {
 
 	var err error
 
-	DataBase, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
-		SkipDefaultTransaction: true,
-	})
+	DataBase, err = gorm.Open(postgres.Open(dsn))
 
 	if err != nil {
 		panic(err)
