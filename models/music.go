@@ -21,8 +21,8 @@ type Music struct {
 	CreatedAt   time.Time            `json:"created_at" gorm:"type:timestamp(0);not null;index"`
 	UpdatedAt   time.Time            `json:"updated_at" gorm:"type:timestamp(0);not null;index"`
 	MusicAlbums []*MusicAlbum        `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	Likes       []*Like              `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	Comments    []*Comment           `json:"-" gorm:"constraint:OnDelete:CASCADE"`
+	Likes       []*Like              `json:"-" gorm:"foreignKey:MusicID;constraint:OnDelete:CASCADE"`
+	Comments    []*Comment           `json:"-" gorm:"foreignKey:MusicID;constraint:OnDelete:CASCADE"`
 }
 
 func (m *Music) Delete() {

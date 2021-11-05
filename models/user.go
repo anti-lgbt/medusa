@@ -31,15 +31,15 @@ type User struct {
 	Data       sql.NullString       `gorm:"type:text"`
 	CreatedAt  time.Time            `gorm:"type:timestamp(0);not null;index"`
 	UpdatedAt  time.Time            `gorm:"type:timestamp(0);not null;index"`
-	Populars   []*Popular           `gorm:"constraint:OnDelete:CASCADE"`
-	Activities []*Activity          `gorm:"constraint:OnDelete:CASCADE"`
-	Labels     []*Label             `gorm:"constraint:OnDelete:CASCADE"`
-	Musics     []*Music             `gorm:"constraint:OnDelete:CASCADE"`
-	Albums     []*Album             `gorm:"constraint:OnDelete:CASCADE"`
-	Likes      []*Like              `gorm:"constraint:OnDelete:CASCADE"`
-	Comments   []*Comment           `gorm:"constraint:OnDelete:CASCADE"`
-	Replys     []*Reply             `gorm:"constraint:OnDelete:CASCADE"`
-	Codes      []*Code              `gorm:"constraint:OnDelete:CASCADE"`
+	Populars   []*Popular           `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	Activities []*Activity          `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	Labels     []*Label             `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	Musics     []*Music             `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	Albums     []*Album             `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	Likes      []*Like              `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	Comments   []*Comment           `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	Replys     []*Reply             `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	Codes      []*Code              `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 
 func (u *User) Language() string {
