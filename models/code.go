@@ -13,8 +13,8 @@ import (
 
 type Code struct {
 	ID           int64              `gorm:"primaryKey"`
-	UserID       int64              `gorm:"type:bigint;not null;uniqueIndex:idx_user_id_and_type;index"`
-	Type         string             `gorm:"type:character varying(10);not null;uniqueIndex:idx_user_id_and_type;index"`
+	UserID       int64              `gorm:"type:bigint;not null;uniqueIndex:idx_user_id_and_type"`
+	Type         string             `gorm:"type:character varying(10);not null;uniqueIndex:idx_user_id_and_type"`
 	Code         string             `gorm:"type:character varying(6);not null"`
 	AttemptCount int64              `gorm:"type:integer;not null"`
 	ValidatedAt  datatypes.NullTime `gorm:"type:timestamp(0)"`
