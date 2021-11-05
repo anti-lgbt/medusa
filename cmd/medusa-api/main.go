@@ -1,8 +1,9 @@
 package main
 
 import (
+	"log"
+
 	"github.com/anti-lgbt/medusa/config"
-	"github.com/anti-lgbt/medusa/routes"
 	"gorm.io/gorm"
 )
 
@@ -13,13 +14,15 @@ type Product struct {
 }
 
 func main() {
-	config.InitializeConfig()
+	config.ConnectDatabase()
+
+	log.Println(config.Database)
 
 	config.Database.AutoMigrate(
 		&Product{},
 	)
 
-	r := routes.SetupRouter()
+	// r := routes.SetupRouter()
 
-	r.Listen(":3000")
+	// r.Listen(":3000")
 }
