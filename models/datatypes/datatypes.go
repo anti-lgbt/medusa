@@ -3,6 +3,7 @@ package datatypes
 import (
 	"database/sql"
 	"encoding/json"
+	"reflect"
 	"time"
 )
 
@@ -30,6 +31,22 @@ func (nb *NullBool) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (ns *NullBool) Scan(value interface{}) error {
+	var s sql.NullBool
+	if err := s.Scan(value); err != nil {
+		return err
+	}
+
+	// if nil then make Valid false
+	if reflect.TypeOf(value) == nil {
+		*ns = NullBool{s.Bool, false}
+	} else {
+		*ns = NullBool{s.Bool, true}
+	}
+
+	return nil
+}
+
 // Nullable Float64 that overrides sql.NullFloat64
 type NullFloat64 sql.NullFloat64
 
@@ -51,6 +68,22 @@ func (nf *NullFloat64) UnmarshalJSON(data []byte) error {
 	} else {
 		nf.Valid = false
 	}
+	return nil
+}
+
+func (ns *NullFloat64) Scan(value interface{}) error {
+	var s sql.NullFloat64
+	if err := s.Scan(value); err != nil {
+		return err
+	}
+
+	// if nil then make Valid false
+	if reflect.TypeOf(value) == nil {
+		*ns = NullFloat64{s.Float64, false}
+	} else {
+		*ns = NullFloat64{s.Float64, true}
+	}
+
 	return nil
 }
 
@@ -78,6 +111,22 @@ func (ni *NullInt64) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (ns *NullInt64) Scan(value interface{}) error {
+	var s sql.NullInt64
+	if err := s.Scan(value); err != nil {
+		return err
+	}
+
+	// if nil then make Valid false
+	if reflect.TypeOf(value) == nil {
+		*ns = NullInt64{s.Int64, false}
+	} else {
+		*ns = NullInt64{s.Int64, true}
+	}
+
+	return nil
+}
+
 // Nullable String that overrides sql.NullString
 type NullString sql.NullString
 
@@ -102,6 +151,22 @@ func (ns *NullString) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (ns *NullString) Scan(value interface{}) error {
+	var s sql.NullString
+	if err := s.Scan(value); err != nil {
+		return err
+	}
+
+	// if nil then make Valid false
+	if reflect.TypeOf(value) == nil {
+		*ns = NullString{s.String, false}
+	} else {
+		*ns = NullString{s.String, true}
+	}
+
+	return nil
+}
+
 // Nullable String that overrides sql.NullString
 type NullTime sql.NullTime
 
@@ -123,5 +188,21 @@ func (ns *NullTime) UnmarshalJSON(data []byte) error {
 	} else {
 		ns.Valid = false
 	}
+	return nil
+}
+
+func (ns *NullTime) Scan(value interface{}) error {
+	var s sql.NullTime
+	if err := s.Scan(value); err != nil {
+		return err
+	}
+
+	// if nil then make Valid false
+	if reflect.TypeOf(value) == nil {
+		*ns = NullTime{s.Time, false}
+	} else {
+		*ns = NullTime{s.Time, true}
+	}
+
 	return nil
 }
