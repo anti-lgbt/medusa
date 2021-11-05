@@ -17,17 +17,17 @@ func main() {
 	config.InitializeConfig()
 
 	config.Database.AutoMigrate(
-		&models.Activity{},
-		&models.Code{},
-		&models.Like{},
-		&models.Reply{},
-		&models.Comment{},
-		&models.MusicAlbum{},
-		&models.Music{},
-		&models.Album{},
-		&models.Popular{},
-		&models.Label{},
 		&models.User{},
+		&models.Activity{},
+		&models.Label{},
+		&models.Popular{},
+		&models.Album{},
+		&models.Music{},
+		&models.MusicAlbum{},
+		&models.Comment{},
+		&models.Reply{},
+		&models.Like{},
+		&models.Code{},
 	)
 
 	r := routes.SetupRouter()
