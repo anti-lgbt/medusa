@@ -20,6 +20,7 @@ type Activity struct {
 	Data          sql.NullString `gorm:"json"`
 	CreatedAt     time.Time      `gorm:"type:timestamp(0);not null;index"`
 	UpdatedAt     time.Time      `gorm:"type:timestamp(0);not null;index"`
+	User          *User
 }
 
 func CreateActivity(user_id int64, category string, user_ip, user_ip_country, user_agent, topic, action, result string, data sql.NullString) (*Activity, error) {

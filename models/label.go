@@ -13,4 +13,5 @@ type Label struct {
 	State     types.LabelState `json:"state" gorm:"type:character varying(10):not null"`
 	CreatedAt time.Time        `json:"created_at" gorm:"type:timestamp(0);not null;index"`
 	UpdatedAt time.Time        `json:"updated_at" gorm:"type:timestamp(0);not null;index"`
+	User      *User
 }

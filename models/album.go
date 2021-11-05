@@ -21,6 +21,7 @@ type Album struct {
 	MusicAlbums []*MusicAlbum        `json:"-" gorm:"foreignKey:MusicID;references:ID;constraint:OnDelete:CASCADE"`
 	Likes       []*Like              `json:"-" gorm:"foreignKey:MusicID;references:ID;constraint:OnDelete:CASCADE"`
 	Comments    []*Comment           `json:"-" gorm:"foreignKey:MusicID;references:ID;constraint:OnDelete:CASCADE"`
+	User        *User
 }
 
 func (a *Album) Musics() []*Music {

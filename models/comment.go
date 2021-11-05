@@ -19,6 +19,9 @@ type Comment struct {
 	Musics    []*Music      `json:"-" gorm:"foreignKey:CommentID;references:ID;constraint:OnDelete:CASCADE"`
 	Albums    []*Album      `json:"-" gorm:"foreignKey:CommentID;references:ID;constraint:OnDelete:CASCADE"`
 	Replys    []*Reply      `json:"-" gorm:"foreignKey:CommentID;references:ID;constraint:OnDelete:CASCADE"`
+	User      *User
+	Music     *Music
+	Album     *Album
 }
 
 func (c *Comment) Delete() {

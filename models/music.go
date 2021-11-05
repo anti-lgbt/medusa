@@ -23,6 +23,7 @@ type Music struct {
 	MusicAlbums []*MusicAlbum        `json:"-" gorm:"constraint:OnDelete:CASCADE"`
 	Likes       []*Like              `json:"-" gorm:"foreignKey:MusicID;references:ID;constraint:OnDelete:CASCADE"`
 	Comments    []*Comment           `json:"-" gorm:"foreignKey:MusicID;references:ID;constraint:OnDelete:CASCADE"`
+	User        *User
 }
 
 func (m *Music) Delete() {
