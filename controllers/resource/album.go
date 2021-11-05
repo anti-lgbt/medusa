@@ -39,7 +39,7 @@ func GetAlbums(c *fiber.Ctx) error {
 
 	user := c.Locals("CurrentUser").(*models.User)
 
-	config.DataBase.Find(&albums, "user_id = ?", user.ID).Offset(params.Page*params.Limit - params.Limit).Limit(params.Limit)
+	config.Database.Find(&albums, "user_id = ?", user.ID).Offset(params.Page*params.Limit - params.Limit).Limit(params.Limit)
 
 	return c.Status(200).JSON(albums)
 }
@@ -56,7 +56,7 @@ func GetAlbum(c *fiber.Ctx) error {
 
 	user := c.Locals("CurrentUser").(*models.User)
 
-	if result := config.DataBase.Find(&album, "id = ? AND user_id = ?", id, user.ID); result.Error != nil {
+	if result := config.Database.Find(&album, "id = ? AND user_id = ?", id, user.ID); result.Error != nil {
 		return c.Status(404).JSON(types.Error{
 			Error: types.RecordNotFound,
 		})

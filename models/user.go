@@ -17,26 +17,29 @@ type UserData struct {
 	IPS      []string `json:"ips"`
 }
 
-type UserAbc struct {
-	ID    int64  `gorm:"primaryKey;autoIncrement;not null;index"`
-	UID   string `gorm:"type:character varying(20);not null;index"`
-	Email string `gorm:"type:character varying(50);not null;uniqueIndex"`
-}
-
 type User struct {
-	ID        int64                `gorm:"primaryKey;autoIncrement;not null;index"`
-	UID       string               `gorm:"type:character varying(20);not null;index"`
-	Email     string               `gorm:"type:character varying(50);not null;uniqueIndex"`
-	Password  string               `gorm:"type:text;not null"`
-	FirstName string               `gorm:"type:character varying(50);not null;index"`
-	LastName  string               `gorm:"type:character varying(50);not null;index"`
-	Bio       datatypes.NullString `gorm:"type:text"`
-	State     types.UserState      `gorm:"type:character varying(10):not null;index"`
-	Role      types.UserRole       `gorm:"type:character varying(10):not null;index"`
-	Avatar    datatypes.NullString `gorm:"type:text"`
-	Data      sql.NullString       `gorm:"type:text"`
-	CreatedAt time.Time            `gorm:"type:timestamp(0);not null;index"`
-	UpdatedAt time.Time            `gorm:"type:timestamp(0);not null;index"`
+	ID         int64                `gorm:"primaryKey;autoIncrement;not null;index"`
+	UID        string               `gorm:"type:character varying(20);not null;index"`
+	Email      string               `gorm:"type:character varying(50);not null;uniqueIndex"`
+	Password   string               `gorm:"type:text;not null"`
+	FirstName  string               `gorm:"type:character varying(50);not null;index"`
+	LastName   string               `gorm:"type:character varying(50);not null;index"`
+	Bio        datatypes.NullString `gorm:"type:text"`
+	State      types.UserState      `gorm:"type:character varying(10):not null;index"`
+	Role       types.UserRole       `gorm:"type:character varying(10):not null;index"`
+	Avatar     datatypes.NullString `gorm:"type:text"`
+	Data       sql.NullString       `gorm:"type:text"`
+	CreatedAt  time.Time            `gorm:"type:timestamp(0);not null;index"`
+	UpdatedAt  time.Time            `gorm:"type:timestamp(0);not null;index"`
+	Populars   []*Popular           `gorm:"constraint:OnDelete:CASCADE"`
+	Activities []*Activity          `gorm:"constraint:OnDelete:CASCADE"`
+	Labels     []*Label             `gorm:"constraint:OnDelete:CASCADE"`
+	Musics     []*Music             `gorm:"constraint:OnDelete:CASCADE"`
+	Albums     []*Album             `gorm:"constraint:OnDelete:CASCADE"`
+	Likes      []*Like              `gorm:"constraint:OnDelete:CASCADE"`
+	Comments   []*Comment           `gorm:"constraint:OnDelete:CASCADE"`
+	Replys     []*Reply             `gorm:"constraint:OnDelete:CASCADE"`
+	Codes      []*Code              `gorm:"constraint:OnDelete:CASCADE"`
 }
 
 func (u *User) Language() string {
