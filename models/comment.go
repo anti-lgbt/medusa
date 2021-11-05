@@ -16,9 +16,9 @@ type Comment struct {
 	Content   string        `json:"content" gorm:"character varying;not null"`
 	CreatedAt time.Time     `json:"created_at" gorm:"type:timestamp(0);not null;index"`
 	UpdatedAt time.Time     `json:"updated_at" gorm:"type:timestamp(0);not null;index"`
-	Musics    []*Music      `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	Albums    []*Album      `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	Replys    []*Reply      `json:"-" gorm:"constraint:OnDelete:CASCADE"`
+	Musics    []*Music      `json:"-" gorm:"foreignKey:CommentID;constraint:OnDelete:CASCADE"`
+	Albums    []*Album      `json:"-" gorm:"foreignKey:CommentID;constraint:OnDelete:CASCADE"`
+	Replys    []*Reply      `json:"-" gorm:"foreignKey:CommentID;constraint:OnDelete:CASCADE"`
 }
 
 func (c *Comment) Delete() {
