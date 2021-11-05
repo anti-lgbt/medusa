@@ -18,15 +18,15 @@ func main() {
 
 	config.Database.AutoMigrate(
 		&models.Activity{},
-		&models.Album{},
-		&models.Music{},
 		&models.Code{},
-		&models.Comment{},
-		&models.Reply{},
-		&models.MusicAlbum{},
 		&models.Like{},
-		&models.Label{},
+		&models.Reply{},
+		&models.Comment{},
+		&models.MusicAlbum{},
+		&models.Music{},
+		&models.Album{},
 		&models.Popular{},
+		&models.Label{},
 		&models.User{},
 	)
 
