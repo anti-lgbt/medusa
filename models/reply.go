@@ -14,7 +14,7 @@ type Reply struct {
 	Content   string    `json:"content" gorm:"type:character varying;not null"`
 	CreatedAt time.Time `json:"created_at" gorm:"type:timestamp(0);not null;index"`
 	UpdatedAt time.Time `json:"updated_at" gorm:"type:timestamp(0);not null;index"`
-	Likes     []*Like   `json:"-" gorm:"foreignKey:CommentID;references:ID;constraint:OnDelete:CASCADE"`
+	Likes     []*Like   `json:"-" gorm:"constraint:OnDelete:CASCADE"`
 	User      *User
 	Comment   *Comment
 }

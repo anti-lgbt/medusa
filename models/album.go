@@ -18,9 +18,9 @@ type Album struct {
 	Image       datatypes.NullString `json:"-" gorm:"type:character varying"`
 	CreatedAt   time.Time            `json:"created_at" gorm:"type:timestamp(0);not null;index"`
 	UpdatedAt   time.Time            `json:"updated_at" gorm:"type:timestamp(0);not null;index"`
-	MusicAlbums []*MusicAlbum        `json:"-" gorm:"foreignKey:MusicID;references:ID;constraint:OnDelete:CASCADE"`
-	Likes       []*Like              `json:"-" gorm:"foreignKey:MusicID;references:ID;constraint:OnDelete:CASCADE"`
-	Comments    []*Comment           `json:"-" gorm:"foreignKey:MusicID;references:ID;constraint:OnDelete:CASCADE"`
+	MusicAlbums []*MusicAlbum        `json:"-" gorm:"constraint:OnDelete:CASCADE"`
+	Likes       []*Like              `json:"-" gorm:"constraint:OnDelete:CASCADE"`
+	Comments    []*Comment           `json:"-" gorm:"constraint:OnDelete:CASCADE"`
 	User        *User
 }
 
