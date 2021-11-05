@@ -25,8 +25,8 @@ type User struct {
 	FirstName  string               `gorm:"type:character varying(50);not null;index"`
 	LastName   string               `gorm:"type:character varying(50);not null;index"`
 	Bio        datatypes.NullString `gorm:"type:text"`
-	State      types.UserState      `gorm:"type:character varying(10):not null;index"`
-	Role       types.UserRole       `gorm:"type:character varying(10):not null;index"`
+	State      types.UserState      `gorm:"type:character varying(10);not null;index"`
+	Role       types.UserRole       `gorm:"type:character varying(10);not null;index"`
 	Avatar     datatypes.NullString `gorm:"type:text"`
 	Data       sql.NullString       `gorm:"type:text"`
 	CreatedAt  time.Time            `gorm:"type:timestamp(0);not null;index"`
