@@ -1,6 +1,8 @@
 package identity
 
 import (
+	"log"
+
 	"github.com/anti-lgbt/medusa/config"
 	"github.com/anti-lgbt/medusa/controllers/helpers"
 	"github.com/anti-lgbt/medusa/models"
@@ -48,8 +50,10 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	if user.DecryptedPassword() != params.Password {
+		log.Println(user.DecryptedPassword())
+
 		return c.Status(422).JSON(types.Error{
-			Error: UserDeleted,
+			Error: UserInvalid,
 		})
 	}
 
