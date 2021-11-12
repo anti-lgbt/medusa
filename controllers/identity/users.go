@@ -46,7 +46,7 @@ func Register(c *fiber.Ctx) error {
 	user = &models.User{
 		UID:       "UID" + uid_number,
 		Email:     params.Email,
-		Password:  string(services.EncryptPassword([]byte(params.Password))),
+		Password:  services.EncryptPassword(params.Password),
 		FirstName: params.FirstName,
 		LastName:  params.LastName,
 		State:     types.UserStatePending,

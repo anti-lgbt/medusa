@@ -79,13 +79,13 @@ func (u *User) GetConfirmationCode(code_type string, reset bool) (code *Code) {
 }
 
 func (u *User) UpdatePassword(password string) {
-	u.Password = string(services.EncryptPassword([]byte(password)))
+	u.Password = services.EncryptPassword(password)
 
 	config.Database.Save(&u)
 }
 
 func (u *User) DecryptedPassword() string {
-	return string(services.DecryptPassword([]byte(u.Password)))
+	return services.DecryptPassword(u.Password)
 }
 
 func (u *User) ToEntity() *entities.User {

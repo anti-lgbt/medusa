@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/md5"
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/hex"
 	"io"
 	"os"
@@ -16,7 +17,7 @@ func createHash(key string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func EncryptPassword(data []byte) []byte {
+func EncryptPassword(password string) string {
 	block, _ := aes.NewCipher([]byte(createHash(os.Getenv("PASSWORD_HASH"))))
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
@@ -26,11 +27,18 @@ func EncryptPassword(data []byte) []byte {
 	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
 		panic(err.Error())
 	}
-	ciphertext := gcm.Seal(nonce, nonce, data, nil)
-	return ciphertext
+	ciphertext := gcm.Seal(nonce, nonce, []byte(password), nil)
+	base64_str := base64.StdEncoding.EncodeToString(ciphertext)
+
+	return base64_str
 }
 
-func DecryptPassword(data []byte) []byte {
+func DecryptPassword(password string) string {
+	data, err := base64.StdEncoding.DecodeString(password)
+	if err != nil {
+		panic(err.Error())
+	}
+
 	key := []byte(createHash(os.Getenv("PASSWORD_HASH")))
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -46,5 +54,5 @@ func DecryptPassword(data []byte) []byte {
 	if err != nil {
 		panic(err.Error())
 	}
-	return plaintext
+	return string(plaintext)
 }

@@ -88,7 +88,7 @@ func UpdateUserPassword(c *fiber.Ctx) error {
 		})
 	}
 
-	if string(services.DecryptPassword([]byte(user.Password))) != params.OldPassword {
+	if services.DecryptPassword(user.Password) != params.OldPassword {
 		return c.Status(422).JSON(types.Error{
 			Error: PasswordPrevPassNotConrrect,
 		})
