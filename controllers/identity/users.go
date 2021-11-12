@@ -70,8 +70,25 @@ func Register(c *fiber.Ctx) error {
 	return c.Status(201).JSON(user.ToEntity())
 }
 
+type ResendEmailCode struct {
+	Email string `json:"email" form:"email"`
+}
+
 func ReSendEmailCode(c *fiber.Ctx) error {
-	user := c.Locals("CurrentUser").(*models.User)
+	var params ResendEmailCode
+	if err := c.BodyParser(&params); err != nil {
+		return c.Status(500).JSON(types.Error{
+			Error: types.ServerInvalidBody,
+		})
+	}
+
+	var user *models.User
+	if result := config.Database.First(&user, "email = ?", params.Email); result.Error != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: UserInvalid,
+		})
+	}
+
 	code := user.GetConfirmationCode("email", true)
 
 	code.SendCode("email_confirmation", user.Language())
@@ -80,16 +97,22 @@ func ReSendEmailCode(c *fiber.Ctx) error {
 }
 
 type VerifyEmailPayload struct {
-	Code string `json:"code" form:"code"`
+	Email string `json:"email" form:"email"`
+	Code  string `json:"code" form:"code"`
 }
 
 func VerifyEmail(c *fiber.Ctx) error {
-	user := c.Locals("CurrentUser").(*models.User)
-
 	var params *VerifyEmailPayload
 	if err := c.BodyParser(&params); err != nil {
 		return c.Status(500).JSON(types.Error{
 			Error: types.ServerInvalidBody,
+		})
+	}
+
+	var user *models.User
+	if result := config.Database.First(&user, "email = ?", params.Email); result.Error != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: UserInvalid,
 		})
 	}
 
