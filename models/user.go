@@ -46,7 +46,7 @@ type User struct {
 func (u *User) Language() string {
 	var user_data *UserData
 
-	if u.Data.Valid && json.Unmarshal([]byte(u.Data.String), &user_data) != nil {
+	if !u.Data.Valid || json.Unmarshal([]byte(u.Data.String), &user_data) != nil || len(user_data.Language) == 0 {
 		return os.Getenv("DEFAULT_LANGUAGE")
 	}
 
