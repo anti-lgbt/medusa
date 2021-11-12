@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"database/sql"
 	"fmt"
 	"path/filepath"
 
@@ -8,7 +9,6 @@ import (
 
 	"github.com/anti-lgbt/medusa/config"
 	"github.com/anti-lgbt/medusa/models"
-	"github.com/anti-lgbt/medusa/models/datatypes"
 	"github.com/anti-lgbt/medusa/services"
 	"github.com/anti-lgbt/medusa/types"
 	"github.com/gofiber/fiber/v2"
@@ -24,9 +24,9 @@ const (
 // PUT /api/v2/resource/users
 func UpdateUser(c *fiber.Ctx) error {
 	type Payload struct {
-		FirstName string               `json:"first_name" form:"first_name"`
-		LastName  string               `json:"last_name" form:"last_name"`
-		Bio       datatypes.NullString `json:"bio" form:"bio"`
+		FirstName string         `json:"first_name" form:"first_name"`
+		LastName  string         `json:"last_name" form:"last_name"`
+		Bio       sql.NullString `json:"bio" form:"bio"`
 	}
 
 	user := c.Locals("CurrentUser").(*models.User)
@@ -54,7 +54,7 @@ func UpdateUser(c *fiber.Ctx) error {
 
 		c.SaveFile(file_header, file_path)
 
-		user.Avatar = datatypes.NullString{
+		user.Avatar = sql.NullString{
 			Valid:  true,
 			String: file_path,
 		}

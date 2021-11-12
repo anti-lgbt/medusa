@@ -6,7 +6,6 @@ import (
 
 	"github.com/anti-lgbt/medusa/config"
 	"github.com/anti-lgbt/medusa/controllers/entities"
-	"github.com/anti-lgbt/medusa/models/datatypes"
 )
 
 type Comment struct {
@@ -48,7 +47,7 @@ func (c *Comment) Like(user_id int64) error {
 
 	like := Like{
 		UserID: user_id,
-		CommentID: datatypes.NullInt64{
+		CommentID: sql.NullInt64{
 			Int64: c.ID,
 			Valid: true,
 		},

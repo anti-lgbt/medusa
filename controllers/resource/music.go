@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"database/sql"
 	"fmt"
 	"path/filepath"
 
@@ -8,7 +9,6 @@ import (
 	"github.com/anti-lgbt/medusa/controllers/entities"
 	"github.com/anti-lgbt/medusa/controllers/queries"
 	"github.com/anti-lgbt/medusa/models"
-	"github.com/anti-lgbt/medusa/models/datatypes"
 	"github.com/anti-lgbt/medusa/services"
 	"github.com/anti-lgbt/medusa/types"
 	"github.com/gofiber/fiber/v2"
@@ -70,10 +70,10 @@ func GetMusic(c *fiber.Ctx) error {
 }
 
 type MusicPayload struct {
-	ID          int64                `json:"id" form:"id"`
-	Name        string               `json:"name" form:"name"`
-	Description datatypes.NullString `json:"description" form:"description"`
-	State       types.MusicState     `json:"state" form:"state"`
+	ID          int64            `json:"id" form:"id"`
+	Name        string           `json:"name" form:"name"`
+	Description sql.NullString   `json:"description" form:"description"`
+	State       types.MusicState `json:"state" form:"state"`
 }
 
 // POST /api/v2/resource/musics
@@ -127,7 +127,7 @@ func CreateMusic(c *fiber.Ctx) error {
 
 		c.SaveFile(image_file_header, file_path)
 
-		music.Image = datatypes.NullString{
+		music.Image = sql.NullString{
 			String: file_path,
 			Valid:  true,
 		}
@@ -193,7 +193,7 @@ func UpdateMusic(c *fiber.Ctx) error {
 
 		c.SaveFile(image_file_header, file_path)
 
-		music.Image = datatypes.NullString{
+		music.Image = sql.NullString{
 			String: file_path,
 			Valid:  true,
 		}

@@ -1,11 +1,11 @@
 package models
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/anti-lgbt/medusa/config"
 	"github.com/anti-lgbt/medusa/controllers/entities"
-	"github.com/anti-lgbt/medusa/models/datatypes"
 )
 
 type Reply struct {
@@ -33,7 +33,7 @@ func (r *Reply) Like(user_id int64) error {
 
 	like := Like{
 		UserID: user_id,
-		ReplyID: datatypes.NullInt64{
+		ReplyID: sql.NullInt64{
 			Int64: r.ID,
 			Valid: true,
 		},

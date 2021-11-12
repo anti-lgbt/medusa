@@ -8,9 +8,9 @@ import (
 
 	"github.com/anti-lgbt/medusa/config"
 	"github.com/anti-lgbt/medusa/controllers/entities"
-	"github.com/anti-lgbt/medusa/models/datatypes"
 	"github.com/anti-lgbt/medusa/services"
 	"github.com/anti-lgbt/medusa/types"
+	"github.com/volatiletech/null"
 )
 
 type UserData struct {
@@ -19,28 +19,28 @@ type UserData struct {
 }
 
 type User struct {
-	ID         int64                `gorm:"primaryKey;autoIncrement;not null;index"`
-	UID        string               `gorm:"type:character varying(20);not null;index"`
-	Email      string               `gorm:"type:character varying(50);not null;uniqueIndex"`
-	Password   string               `gorm:"type:text;not null"`
-	FirstName  string               `gorm:"type:character varying(50);not null;index"`
-	LastName   string               `gorm:"type:character varying(50);not null;index"`
-	Bio        datatypes.NullString `gorm:"type:text"`
-	State      types.UserState      `gorm:"type:character varying(10);not null;index"`
-	Role       types.UserRole       `gorm:"type:character varying(10);not null;index"`
-	Avatar     datatypes.NullString `gorm:"type:text"`
-	Data       sql.NullString       `gorm:"type:text"`
-	CreatedAt  time.Time            `gorm:"type:timestamp(0);not null;index"`
-	UpdatedAt  time.Time            `gorm:"type:timestamp(0);not null;index"`
-	Populars   []*Popular           `gorm:"constraint:OnDelete:CASCADE"`
-	Activities []*Activity          `gorm:"constraint:OnDelete:CASCADE"`
-	Labels     []*Label             `gorm:"constraint:OnDelete:CASCADE"`
-	Musics     []*Music             `gorm:"constraint:OnDelete:CASCADE"`
-	Albums     []*Album             `gorm:"constraint:OnDelete:CASCADE"`
-	Likes      []*Like              `gorm:"constraint:OnDelete:CASCADE"`
-	Comments   []*Comment           `gorm:"constraint:OnDelete:CASCADE"`
-	Replys     []*Reply             `gorm:"constraint:OnDelete:CASCADE"`
-	Codes      []*Code              `gorm:"constraint:OnDelete:CASCADE"`
+	ID         int64           `gorm:"primaryKey;autoIncrement;not null;index"`
+	UID        string          `gorm:"type:character varying(20);not null;index"`
+	Email      string          `gorm:"type:character varying(50);not null;uniqueIndex"`
+	Password   string          `gorm:"type:text;not null"`
+	FirstName  string          `gorm:"type:character varying(50);not null;index"`
+	LastName   string          `gorm:"type:character varying(50);not null;index"`
+	Bio        sql.NullString  `gorm:"type:text"`
+	State      types.UserState `gorm:"type:character varying(10);not null;index"`
+	Role       types.UserRole  `gorm:"type:character varying(10);not null;index"`
+	Avatar     sql.NullString  `gorm:"type:text"`
+	Data       sql.NullString  `gorm:"type:text"`
+	CreatedAt  time.Time       `gorm:"type:timestamp(0);not null;index"`
+	UpdatedAt  time.Time       `gorm:"type:timestamp(0);not null;index"`
+	Populars   []*Popular      `gorm:"constraint:OnDelete:CASCADE"`
+	Activities []*Activity     `gorm:"constraint:OnDelete:CASCADE"`
+	Labels     []*Label        `gorm:"constraint:OnDelete:CASCADE"`
+	Musics     []*Music        `gorm:"constraint:OnDelete:CASCADE"`
+	Albums     []*Album        `gorm:"constraint:OnDelete:CASCADE"`
+	Likes      []*Like         `gorm:"constraint:OnDelete:CASCADE"`
+	Comments   []*Comment      `gorm:"constraint:OnDelete:CASCADE"`
+	Replys     []*Reply        `gorm:"constraint:OnDelete:CASCADE"`
+	Codes      []*Code         `gorm:"constraint:OnDelete:CASCADE"`
 }
 
 func (u *User) Language() string {
@@ -62,7 +62,7 @@ func (u *User) GetConfirmationCode(code_type string, reset bool) (code *Code) {
 			Type:         code_type,
 			Code:         code_gen,
 			AttemptCount: 0,
-			ValidatedAt:  datatypes.NullTime{},
+			ValidatedAt:  sql.NullTime{},
 			ExpiredAt:    time.Now().Add(30 * time.Minute),
 		}
 
@@ -95,7 +95,10 @@ func (u *User) ToEntity() *entities.User {
 		Email:     u.Email,
 		FirstName: u.FirstName,
 		LastName:  u.LastName,
-		Bio:       u.Bio,
+		Bio: null.String{
+			String: u.Bio.String,
+			Valid:  u.Bio.Valid,
+		},
 		State:     u.State,
 		Role:      u.Role,
 		CreatedAt: u.CreatedAt,

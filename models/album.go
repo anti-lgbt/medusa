@@ -6,22 +6,22 @@ import (
 
 	"github.com/anti-lgbt/medusa/config"
 	"github.com/anti-lgbt/medusa/controllers/entities"
-	"github.com/anti-lgbt/medusa/models/datatypes"
+	"github.com/volatiletech/null"
 )
 
 type Album struct {
-	ID          int64                `json:"id" gorm:"primaryKey"`
-	UserID      int64                `json:"user_id" gorm:"type:bigint;not null;index"`
-	Name        string               `json:"name" gorm:"type:character varying;not null;index"`
-	Description datatypes.NullString `json:"description" gorm:"type:character varying;index"`
-	Private     bool                 `json:"private" gorm:"type:boolean;not null;index"`
-	ViewCount   int64                `json:"view_count" gorm:"type:integer;not null;index;default:0"`
-	Image       datatypes.NullString `json:"-" gorm:"type:character varying"`
-	CreatedAt   time.Time            `json:"created_at" gorm:"type:timestamp(0);not null;index"`
-	UpdatedAt   time.Time            `json:"updated_at" gorm:"type:timestamp(0);not null;index"`
-	MusicAlbums []*MusicAlbum        `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	Likes       []*Like              `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	Comments    []*Comment           `json:"-" gorm:"constraint:OnDelete:CASCADE"`
+	ID          int64          `json:"id" gorm:"primaryKey"`
+	UserID      int64          `json:"user_id" gorm:"type:bigint;not null;index"`
+	Name        string         `json:"name" gorm:"type:character varying;not null;index"`
+	Description sql.NullString `json:"description" gorm:"type:character varying;index"`
+	Private     bool           `json:"private" gorm:"type:boolean;not null;index"`
+	ViewCount   int64          `json:"view_count" gorm:"type:integer;not null;index;default:0"`
+	Image       sql.NullString `json:"-" gorm:"type:character varying"`
+	CreatedAt   time.Time      `json:"created_at" gorm:"type:timestamp(0);not null;index"`
+	UpdatedAt   time.Time      `json:"updated_at" gorm:"type:timestamp(0);not null;index"`
+	MusicAlbums []*MusicAlbum  `json:"-" gorm:"constraint:OnDelete:CASCADE"`
+	Likes       []*Like        `json:"-" gorm:"constraint:OnDelete:CASCADE"`
+	Comments    []*Comment     `json:"-" gorm:"constraint:OnDelete:CASCADE"`
 	User        *User
 }
 
@@ -61,7 +61,7 @@ func (a *Album) Like(user_id int64) error {
 
 	like := Like{
 		UserID: user_id,
-		AlbumID: datatypes.NullInt64{
+		AlbumID: sql.NullInt64{
 			Int64: a.ID,
 			Valid: true,
 		},
@@ -92,14 +92,17 @@ func (a *Album) ToEntity() *entities.Album {
 	}
 
 	return &entities.Album{
-		ID:          a.ID,
-		Name:        a.Name,
-		Description: a.Description,
-		Private:     a.Private,
-		ViewCount:   a.ViewCount,
-		LikeCount:   a.LikeCount(),
-		Musics:      music_entities,
-		CreatedAt:   a.CreatedAt,
-		UpdatedAt:   a.UpdatedAt,
+		ID:   a.ID,
+		Name: a.Name,
+		Description: null.String{
+			String: a.Description.String,
+			Valid:  a.Description.Valid,
+		},
+		Private:   a.Private,
+		ViewCount: a.ViewCount,
+		LikeCount: a.LikeCount(),
+		Musics:    music_entities,
+		CreatedAt: a.CreatedAt,
+		UpdatedAt: a.UpdatedAt,
 	}
 }

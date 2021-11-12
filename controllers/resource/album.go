@@ -1,27 +1,28 @@
 package resource
 
 import (
+	"database/sql"
 	"fmt"
 	"path/filepath"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/volatiletech/null"
 
 	"github.com/anti-lgbt/medusa/config"
 	"github.com/anti-lgbt/medusa/controllers/entities"
 	"github.com/anti-lgbt/medusa/controllers/queries"
 	"github.com/anti-lgbt/medusa/models"
-	"github.com/anti-lgbt/medusa/models/datatypes"
 	"github.com/anti-lgbt/medusa/services"
 	"github.com/anti-lgbt/medusa/types"
 )
 
 type AlbumPayload struct {
-	ID          int64                `json:"id" form:"id"`
-	Name        string               `json:"name" form:"name"`
-	Description datatypes.NullString `json:"description" form:"description"`
-	Private     bool                 `json:"private" form:"private"`
-	Musics      []int64              `json:"music" form:"music"`
+	ID          int64       `json:"id" form:"id"`
+	Name        string      `json:"name" form:"name"`
+	Description null.String `json:"description" form:"description"`
+	Private     bool        `json:"private" form:"private"`
+	Musics      []int64     `json:"music" form:"music"`
 }
 
 // GET /api/v2/resource/albums
@@ -102,9 +103,12 @@ func CreateAlbum(c *fiber.Ctx) error {
 	}
 
 	album := &models.Album{
-		UserID:      user.ID,
-		Name:        params.Name,
-		Description: params.Description,
+		UserID: user.ID,
+		Name:   params.Name,
+		Description: sql.NullString{
+			String: params.Description.String,
+			Valid:  params.Description.Valid,
+		},
 		Private:     params.Private,
 		ViewCount:   0,
 		MusicAlbums: music_albums,
@@ -119,7 +123,7 @@ func CreateAlbum(c *fiber.Ctx) error {
 
 		c.SaveFile(file_header, file_path)
 
-		album.Image = datatypes.NullString{
+		album.Image = sql.NullString{
 			String: file_name,
 			Valid:  true,
 		}
@@ -147,7 +151,10 @@ func UpdateAlbum(c *fiber.Ctx) error {
 	}
 
 	album.Name = params.Name
-	album.Description = params.Description
+	album.Description = sql.NullString{
+		String: params.Description.String,
+		Valid:  params.Description.Valid,
+	}
 	album.Private = params.Private
 
 	file_header, err := c.FormFile("image")
@@ -159,7 +166,7 @@ func UpdateAlbum(c *fiber.Ctx) error {
 
 		c.SaveFile(file_header, file_path)
 
-		album.Image = datatypes.NullString{
+		album.Image = sql.NullString{
 			String: file_name,
 			Valid:  true,
 		}
