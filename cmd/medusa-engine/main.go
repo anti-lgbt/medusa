@@ -26,7 +26,7 @@ func main() {
 		config.Logger.Println("Start finex-engine: " + id)
 		worker := CreateWorker(id)
 
-		sub, _ := config.Nats.SubscribeSync(id)
+		sub, _ := config.Nats.SubscribeSync("engines:" + id)
 
 		for {
 			m, err := sub.NextMsg(1 * time.Second)
