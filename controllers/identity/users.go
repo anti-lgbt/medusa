@@ -128,7 +128,6 @@ func VerifyEmail(c *fiber.Ctx) error {
 		code.AttemptCount++
 
 		config.Database.Save(&code)
-
 		return c.Status(422).JSON(types.Error{
 			Error: UserCodeInconrrect,
 		})

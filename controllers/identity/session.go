@@ -66,13 +66,13 @@ func Login(c *fiber.Ctx) error {
 
 	jwt_token, err := helpers.GenerateJWT(user)
 	if err != nil {
-		log.Println(err)
 		return c.Status(401).JSON(types.Error{
 			Error: types.AuthzInvalidSession,
 		})
 	}
 
 	session.Set("jwt", jwt_token)
+	session.Save()
 
 	services.SendEmail("email_verification_successful", user.Email, user.Language(), nil)
 

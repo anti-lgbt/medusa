@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/google/uuid"
+	"github.com/volatiletech/null"
 
 	"github.com/anti-lgbt/medusa/config"
 	"github.com/anti-lgbt/medusa/models"
@@ -21,12 +22,19 @@ const (
 	PasswordNoChangeProvided    = "resource.password.no_change_provided"
 )
 
+// PUT /api/v2/resource/me
+func GetUserProfile(c *fiber.Ctx) error {
+	user := c.Locals("CurrentUser").(*models.User)
+
+	return c.Status(200).JSON(user.ToEntity())
+}
+
 // PUT /api/v2/resource/users
 func UpdateUser(c *fiber.Ctx) error {
 	type Payload struct {
-		FirstName string         `json:"first_name" form:"first_name"`
-		LastName  string         `json:"last_name" form:"last_name"`
-		Bio       sql.NullString `json:"bio" form:"bio"`
+		FirstName string      `json:"first_name" form:"first_name"`
+		LastName  string      `json:"last_name" form:"last_name"`
+		Bio       null.String `json:"bio" form:"bio"`
 	}
 
 	user := c.Locals("CurrentUser").(*models.User)
@@ -39,10 +47,13 @@ func UpdateUser(c *fiber.Ctx) error {
 
 	user.FirstName = params.FirstName
 	user.LastName = params.LastName
-	user.Bio = params.Bio
+	user.Bio = sql.NullString{
+		String: params.Bio.String,
+		Valid:  params.Bio.Valid,
+	}
 
 	file_header, err := c.FormFile("avatar")
-	if err != nil {
+	if err == nil {
 		if !services.VerifyFileType(file_header, types.FileTypeImage) {
 			return c.Status(422).JSON(types.Error{
 				Error: UserAvatarNotValid,

@@ -53,6 +53,7 @@ func SetupRouter() *fiber.App {
 
 		api_resource_users := api_resource.Group("/users")
 		{
+			api_resource_users.Get("/me", resource.GetUserProfile)
 			api_resource_users.Put("/", resource.UpdateUser)
 			api_resource_users.Put("/password", resource.UpdateUserPassword)
 		}

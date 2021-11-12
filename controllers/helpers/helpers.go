@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"encoding/base64"
 	"mime/multipart"
 	"os"
 
@@ -22,7 +23,14 @@ func GenerateJWT(user *models.User) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	return token.SignedString(os.Getenv("JWT_PRIVATE_KEY"))
+	jwt_private_key_base64 := os.Getenv("JWT_PRIVATE_KEY")
+
+	jwt_private_key, err := base64.StdEncoding.DecodeString(jwt_private_key_base64)
+	if err != nil {
+		return "", err
+	}
+
+	return token.SignedString([]byte(jwt_private_key))
 }
 
 func VerifyFileType(file_header *multipart.FileHeader, file_type string) bool {

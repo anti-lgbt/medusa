@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"encoding/base64"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
@@ -29,7 +30,14 @@ func IsAuth(c *fiber.Ctx) error {
 	}
 
 	token, err := jwt.Parse(jwt_token.(string), func(t *jwt.Token) (interface{}, error) {
-		return os.Getenv("JWT_PRIVATE_KEY"), nil
+		jwt_private_key_base64 := os.Getenv("JWT_PRIVATE_KEY")
+
+		jwt_private_key, err := base64.StdEncoding.DecodeString(jwt_private_key_base64)
+		if err != nil {
+			return "", err
+		}
+
+		return jwt_private_key, nil
 	})
 	if err != nil {
 		return c.Status(401).JSON(types.Error{
