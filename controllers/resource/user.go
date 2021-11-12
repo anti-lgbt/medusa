@@ -102,7 +102,7 @@ func UpdateUserPassword(c *fiber.Ctx) error {
 
 	user.UpdatePassword(params.NewPassword)
 
-	services.SendEmail("password_changed", user.Language(), nil)
+	services.SendEmail("password_changed", user.Email, user.Language(), nil)
 
 	return c.Status(201).JSON(201)
 }

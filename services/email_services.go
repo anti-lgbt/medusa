@@ -7,10 +7,11 @@ import (
 	"github.com/anti-lgbt/medusa/types"
 )
 
-func SendEmail(key, language string, record map[string]interface{}) error {
+func SendEmail(key, to, language string, record map[string]interface{}) error {
 	payload := &types.EngineMailerPayload{
 		Key:      key,
 		Language: language,
+		To:       to,
 		Record:   record,
 	}
 

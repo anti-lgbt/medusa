@@ -75,9 +75,15 @@ func (c *Code) Validation() {
 }
 
 func (c *Code) SendCode(template string, language string) {
+	var user *User
+
+	config.Database.First(&user, "id = ?", c.UserID)
+
 	services.SendEmail(
 		template,
-		language, map[string]interface{}{
+		user.Email,
+		language,
+		map[string]interface{}{
 			"code": c.Code,
 		},
 	)

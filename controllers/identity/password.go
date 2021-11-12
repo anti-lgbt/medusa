@@ -125,7 +125,7 @@ func ResetPassword(c *fiber.Ctx) error {
 	user.UpdatePassword(params.Password)
 	code.Validation()
 
-	services.SendEmail("password_reset_successful", user.Language(), nil)
+	services.SendEmail("password_reset_successful", user.Email, user.Language(), nil)
 
 	return c.Status(200).JSON(200)
 }

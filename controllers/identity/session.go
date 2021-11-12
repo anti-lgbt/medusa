@@ -69,7 +69,7 @@ func Login(c *fiber.Ctx) error {
 
 	session.Set("jwt", jwt_token)
 
-	services.SendEmail("email_verification_successful", user.Language(), nil)
+	services.SendEmail("email_verification_successful", user.Email, user.Language(), nil)
 
 	return c.Status(200).JSON(user.ToEntity())
 }
