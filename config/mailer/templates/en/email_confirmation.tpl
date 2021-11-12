@@ -1,1 +1,1 @@
-You email code is {{ .Code }}
+You email confirmation code is {{ .code }}

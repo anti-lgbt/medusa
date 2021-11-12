@@ -1,1 +1,1 @@
-You reset password code is {{ .Code }}
+You reset password code is {{ .code }}

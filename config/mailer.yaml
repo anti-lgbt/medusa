@@ -10,5 +10,5 @@ events:
     key: email_confirmation
     templates:
       en:
-        subject: Password Reset
+        subject: Email Confirmation
         template_path: templates/en/email_confirmation.tpl
