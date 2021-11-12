@@ -16,5 +16,5 @@ func SendEmail(key, language string, record map[string]interface{}) error {
 
 	buf, _ := json.Marshal(payload)
 
-	return config.Nats.Publish("engines:mailer", buf)
+	return config.Nats.Publish("mailer", buf)
 }

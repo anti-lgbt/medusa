@@ -26,7 +26,7 @@ func main() {
 		config.Logger.Println("Start finex-engine: " + id)
 		worker := CreateWorker(id)
 
-		sub, _ := config.Nats.SubscribeSync("engines:" + id)
+		sub, _ := config.Nats.SubscribeSync(id)
 
 		for {
 			m, err := sub.NextMsg(1 * time.Second)
@@ -35,7 +35,7 @@ func main() {
 				continue
 			}
 
-			// config.Logger.Infof("Receive message: %s", string(m.Data))
+			config.Logger.Infof("Receive message: %s", string(m.Data))
 			if err := worker.Process(m.Data); err == nil {
 				m.Ack()
 			} else {
