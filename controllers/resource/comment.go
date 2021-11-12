@@ -95,7 +95,7 @@ func CreateReply(c *fiber.Ctx) error {
 
 	config.Database.Create(&reply)
 
-	return c.Status(201).JSON(reply)
+	return c.Status(201).JSON(reply.ToEntity())
 }
 
 // DELETE /api/v2/resource/comments/reply/:id

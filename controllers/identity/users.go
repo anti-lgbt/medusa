@@ -67,7 +67,7 @@ func Register(c *fiber.Ctx) error {
 
 	code.SendCode("email_confirmation", user.Language())
 
-	return c.Status(201).JSON(user)
+	return c.Status(201).JSON(user.ToEntity())
 }
 
 func ReSendEmailCode(c *fiber.Ctx) error {
@@ -76,7 +76,7 @@ func ReSendEmailCode(c *fiber.Ctx) error {
 
 	code.SendCode("email_confirmation", user.Language())
 
-	return c.Status(200).JSON(user)
+	return c.Status(200).JSON(user.ToEntity())
 }
 
 type VerifyEmailPayload struct {
@@ -121,5 +121,5 @@ func VerifyEmail(c *fiber.Ctx) error {
 
 	code.SendCode("email_verification_successful", user.Language())
 
-	return c.Status(200).JSON(user)
+	return c.Status(200).JSON(user.ToEntity())
 }

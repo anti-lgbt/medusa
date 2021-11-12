@@ -71,5 +71,5 @@ func Login(c *fiber.Ctx) error {
 
 	services.SendEmail("email_verification_successful", user.Language(), nil)
 
-	return c.Status(200).JSON(user)
+	return c.Status(200).JSON(user.ToEntity())
 }

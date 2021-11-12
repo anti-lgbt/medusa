@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/anti-lgbt/medusa/config"
+	"github.com/anti-lgbt/medusa/controllers/entities"
 	"github.com/anti-lgbt/medusa/models/datatypes"
 )
 
@@ -67,4 +68,25 @@ func (c *Comment) LikeCount() int64 {
 	config.Database.Model(&Like{}).Where("comment_id = ?", c.ID).Count(&count)
 
 	return count
+}
+
+func (r *Comment) ToEntity() *entities.Comment {
+	var replies []*Reply
+
+	config.Database.Find(&replies, "comment_id = ?", r.ID)
+
+	reply_entities := make([]*entities.Reply, 0)
+
+	for _, reply := range replies {
+		reply_entities = append(reply_entities, reply.ToEntity())
+	}
+
+	return &entities.Comment{
+		ID:        r.ID,
+		Content:   r.Content,
+		LikeCount: r.LikeCount(),
+		Replies:   reply_entities,
+		CreatedAt: r.CreatedAt,
+		UpdatedAt: r.UpdatedAt,
+	}
 }

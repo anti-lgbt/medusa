@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/anti-lgbt/medusa/config"
+	"github.com/anti-lgbt/medusa/controllers/entities"
 	"github.com/anti-lgbt/medusa/controllers/queries"
 	"github.com/anti-lgbt/medusa/models"
 	"github.com/anti-lgbt/medusa/models/datatypes"
@@ -41,7 +42,13 @@ func GetAlbums(c *fiber.Ctx) error {
 
 	config.Database.Find(&albums, "user_id = ?", user.ID).Offset(params.Page*params.Limit - params.Limit).Limit(params.Limit)
 
-	return c.Status(200).JSON(albums)
+	album_entities := make([]*entities.Album, 0)
+
+	for _, album := range albums {
+		album_entities = append(album_entities, album.ToEntity())
+	}
+
+	return c.Status(200).JSON(album_entities)
 }
 
 // GET /api/v2/resource/albums/:id
@@ -62,7 +69,7 @@ func GetAlbum(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(200).JSON(album)
+	return c.Status(200).JSON(album.ToEntity())
 }
 
 // POST /api/v2/resource/albums
@@ -120,7 +127,7 @@ func CreateAlbum(c *fiber.Ctx) error {
 
 	config.Database.Create(&album)
 
-	return c.Status(201).JSON(album)
+	return c.Status(201).JSON(album.ToEntity())
 }
 
 // PUT /api/v2/resource/albums
@@ -185,7 +192,7 @@ func UpdateAlbum(c *fiber.Ctx) error {
 
 	config.Database.Save(&album)
 
-	return c.Status(201).JSON(album)
+	return c.Status(201).JSON(album.ToEntity())
 }
 
 // POST /api/v2/resource/albums/:id/fork
@@ -226,7 +233,7 @@ func ForkAlbum(c *fiber.Ctx) error {
 
 	config.Database.Create(&album)
 
-	return c.Status(201).JSON(album)
+	return c.Status(201).JSON(album.ToEntity())
 }
 
 // DELETE /api/v2/resource/albums/:id
@@ -327,5 +334,5 @@ func CommentAlbum(c *fiber.Ctx) error {
 
 	comment := album.Comment(user.ID, params.Content)
 
-	return c.Status(200).JSON(comment)
+	return c.Status(200).JSON(comment.ToEntity())
 }

@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/anti-lgbt/medusa/config"
+	"github.com/anti-lgbt/medusa/controllers/entities"
 	"github.com/anti-lgbt/medusa/controllers/queries"
 	"github.com/anti-lgbt/medusa/models"
 	"github.com/anti-lgbt/medusa/models/datatypes"
@@ -38,7 +39,13 @@ func GetMusics(c *fiber.Ctx) error {
 
 	config.Database.Find(&musics, "user_id = ?", user.ID).Offset(params.Page*params.Limit - params.Limit).Limit(params.Limit)
 
-	return c.Status(200).JSON(musics)
+	music_entities := make([]*entities.Music, 0)
+
+	for _, music := range musics {
+		music_entities = append(music_entities, music.ToEntity())
+	}
+
+	return c.Status(200).JSON(music_entities)
 }
 
 // GET /api/v2/resource/musics/:id
@@ -59,7 +66,7 @@ func GetMusic(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(200).JSON(music)
+	return c.Status(200).JSON(music.ToEntity())
 }
 
 type MusicPayload struct {
@@ -128,7 +135,7 @@ func CreateMusic(c *fiber.Ctx) error {
 
 	config.Database.Create(&music)
 
-	return c.Status(200).JSON(music)
+	return c.Status(200).JSON(music.ToEntity())
 }
 
 // PUT /api/v2/resource/musics
@@ -194,7 +201,7 @@ func UpdateMusic(c *fiber.Ctx) error {
 
 	config.Database.Save(&music)
 
-	return c.Status(200).JSON(music)
+	return c.Status(200).JSON(music.ToEntity())
 }
 
 // DELETE /api/v2/resource/musics/:id
@@ -297,5 +304,5 @@ func CommentMusic(c *fiber.Ctx) error {
 
 	comment := music.Comment(user.ID, params.Content)
 
-	return c.Status(200).JSON(comment)
+	return c.Status(200).JSON(comment.ToEntity())
 }

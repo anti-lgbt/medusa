@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/anti-lgbt/medusa/config"
+	"github.com/anti-lgbt/medusa/controllers/entities"
 	"github.com/anti-lgbt/medusa/models/datatypes"
 )
 
@@ -52,4 +53,14 @@ func (r *Reply) LikeCount() int64 {
 	config.Database.Model(&Like{}).Where("reply_id = ?", r.ID).Count(&count)
 
 	return count
+}
+
+func (r *Reply) ToEntity() *entities.Reply {
+	return &entities.Reply{
+		ID:        r.ID,
+		Content:   r.Content,
+		LikeCount: r.LikeCount(),
+		CreatedAt: r.CreatedAt,
+		UpdatedAt: r.UpdatedAt,
+	}
 }

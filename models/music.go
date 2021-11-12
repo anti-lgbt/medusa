@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/anti-lgbt/medusa/config"
+	"github.com/anti-lgbt/medusa/controllers/entities"
 	"github.com/anti-lgbt/medusa/models/datatypes"
 	"github.com/anti-lgbt/medusa/types"
 )
@@ -74,4 +75,17 @@ func (m *Music) LikeCount() int64 {
 	config.Database.Model(&Like{}).Where("music_id = ?", m.ID).Count(&count)
 
 	return count
+}
+
+func (r *Music) ToEntity() *entities.Music {
+	return &entities.Music{
+		ID:          r.ID,
+		Name:        r.Name,
+		Description: r.Description,
+		State:       r.State,
+		ViewCount:   r.ViewCount,
+		LikeCount:   r.LikeCount(),
+		CreatedAt:   r.CreatedAt,
+		UpdatedAt:   r.UpdatedAt,
+	}
 }

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/anti-lgbt/medusa/config"
+	"github.com/anti-lgbt/medusa/controllers/entities"
 	"github.com/anti-lgbt/medusa/models/datatypes"
 	"github.com/anti-lgbt/medusa/services"
 	"github.com/anti-lgbt/medusa/types"
@@ -85,4 +86,19 @@ func (u *User) UpdatePassword(password string) {
 
 func (u *User) DecryptedPassword() string {
 	return string(services.DecryptPassword([]byte(u.Password)))
+}
+
+func (u *User) ToEntity() *entities.User {
+	return &entities.User{
+		ID:        u.ID,
+		UID:       u.UID,
+		Email:     u.Email,
+		FirstName: u.FirstName,
+		LastName:  u.LastName,
+		Bio:       u.Bio,
+		State:     u.State,
+		Role:      u.Role,
+		CreatedAt: u.CreatedAt,
+		UpdatedAt: u.UpdatedAt,
+	}
 }

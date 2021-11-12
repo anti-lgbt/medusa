@@ -40,7 +40,7 @@ func GetMusic(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(200).JSON(music)
+	return c.Status(200).JSON(music.ToEntity())
 }
 
 // GET /api/v2/public/musics/:id/audio
@@ -101,11 +101,11 @@ func GetAlbum(c *fiber.Ctx) error {
 		}
 
 		if user.ID == album.UserID {
-			return c.Status(200).JSON(album)
+			return c.Status(200).JSON(album.ToEntity())
 		}
 	}
 
-	return c.Status(200).JSON(album)
+	return c.Status(200).JSON(album.ToEntity())
 }
 
 // GET /api/v2/public/albums/:id/image
