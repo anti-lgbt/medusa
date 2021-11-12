@@ -59,13 +59,14 @@ func Login(c *fiber.Ctx) error {
 
 	session, err := config.SessionStore.Get(c)
 	if err != nil {
-		return c.Status(401).JSON(types.Error{
+		return c.Status(422).JSON(types.Error{
 			Error: UserInvalid,
 		})
 	}
 
 	jwt_token, err := helpers.GenerateJWT(user)
 	if err != nil {
+		log.Println(err)
 		return c.Status(401).JSON(types.Error{
 			Error: types.AuthzInvalidSession,
 		})
