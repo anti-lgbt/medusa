@@ -18,9 +18,9 @@ type Comment struct {
 	CreatedAt time.Time     `json:"created_at" gorm:"type:timestamp(0);not null;index"`
 	UpdatedAt time.Time     `json:"updated_at" gorm:"type:timestamp(0);not null;index"`
 	Likes     []*Like       `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	User      *User
-	Music     *Music
-	Album     *Album
+	User      *User         `json:"-"`
+	Music     *Music        `json:"-"`
+	Album     *Album        `json:"-"`
 }
 
 func (c *Comment) Delete() {
