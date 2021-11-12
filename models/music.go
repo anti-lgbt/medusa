@@ -77,15 +77,15 @@ func (m *Music) LikeCount() int64 {
 	return count
 }
 
-func (r *Music) ToEntity() *entities.Music {
+func (m *Music) ToEntity() *entities.Music {
 	return &entities.Music{
-		ID:          r.ID,
-		Name:        r.Name,
-		Description: r.Description,
-		State:       r.State,
-		ViewCount:   r.ViewCount,
-		LikeCount:   r.LikeCount(),
-		CreatedAt:   r.CreatedAt,
-		UpdatedAt:   r.UpdatedAt,
+		ID:          m.ID,
+		Name:        m.Name,
+		Description: m.Description,
+		State:       m.State,
+		ViewCount:   m.ViewCount,
+		LikeCount:   m.LikeCount(),
+		CreatedAt:   m.CreatedAt,
+		UpdatedAt:   m.UpdatedAt,
 	}
 }

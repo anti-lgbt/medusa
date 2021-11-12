@@ -83,15 +83,23 @@ func (a *Album) LikeCount() int64 {
 	return count
 }
 
-func (r *Album) ToEntity() *entities.Album {
+func (a *Album) ToEntity() *entities.Album {
+	musics := a.Musics()
+	music_entities := make([]*entities.Music, 0)
+
+	for _, music := range musics {
+		music_entities = append(music_entities, music.ToEntity())
+	}
+
 	return &entities.Album{
-		ID:          r.ID,
-		Name:        r.Name,
-		Description: r.Description,
-		Private:     r.Private,
-		ViewCount:   r.ViewCount,
-		LikeCount:   r.LikeCount(),
-		CreatedAt:   r.CreatedAt,
-		UpdatedAt:   r.UpdatedAt,
+		ID:          a.ID,
+		Name:        a.Name,
+		Description: a.Description,
+		Private:     a.Private,
+		ViewCount:   a.ViewCount,
+		LikeCount:   a.LikeCount(),
+		Musics:      music_entities,
+		CreatedAt:   a.CreatedAt,
+		UpdatedAt:   a.UpdatedAt,
 	}
 }

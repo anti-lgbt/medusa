@@ -70,10 +70,10 @@ func (c *Comment) LikeCount() int64 {
 	return count
 }
 
-func (r *Comment) ToEntity() *entities.Comment {
+func (c *Comment) ToEntity() *entities.Comment {
 	var replies []*Reply
 
-	config.Database.Find(&replies, "comment_id = ?", r.ID)
+	config.Database.Find(&replies, "comment_id = ?", c.ID)
 
 	reply_entities := make([]*entities.Reply, 0)
 
@@ -82,11 +82,11 @@ func (r *Comment) ToEntity() *entities.Comment {
 	}
 
 	return &entities.Comment{
-		ID:        r.ID,
-		Content:   r.Content,
-		LikeCount: r.LikeCount(),
+		ID:        c.ID,
+		Content:   c.Content,
+		LikeCount: c.LikeCount(),
 		Replies:   reply_entities,
-		CreatedAt: r.CreatedAt,
-		UpdatedAt: r.UpdatedAt,
+		CreatedAt: c.CreatedAt,
+		UpdatedAt: c.UpdatedAt,
 	}
 }
