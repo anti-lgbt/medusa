@@ -11,6 +11,7 @@ import (
 const (
 	PasswordCodeInconrrect = "identity.password.code_incorrect"
 	PasswordDoesntNotMatch = "identity.password.does_not_match"
+	Password
 )
 
 func GenerateCodeResetPassword(c *fiber.Ctx) error {
@@ -59,7 +60,7 @@ func CheckCodeResetPassword(c *fiber.Ctx) error {
 		})
 	}
 
-	code := user.GetConfirmationCode("email", true)
+	code := user.GetConfirmationCode("email", false)
 
 	if code.Expired() || code.Validated() || code.OutAttempt() {
 		return c.Status(422).JSON(types.Error{
@@ -70,6 +71,7 @@ func CheckCodeResetPassword(c *fiber.Ctx) error {
 	if code.Code != params.Code {
 		code.AttemptCount++
 
+		config.Database.Save(&code)
 		return c.Status(422).JSON(types.Error{
 			Error: PasswordCodeInconrrect,
 		})
@@ -100,7 +102,7 @@ func ResetPassword(c *fiber.Ctx) error {
 		})
 	}
 
-	code := user.GetConfirmationCode("email", true)
+	code := user.GetConfirmationCode("email", false)
 
 	if code.Expired() || code.Validated() || code.OutAttempt() {
 		return c.Status(422).JSON(types.Error{
