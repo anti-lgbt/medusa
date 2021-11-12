@@ -8,13 +8,12 @@ import (
 
 var Nats *nats.Conn
 
-func ConnectNats() error {
+func ConnectNats() {
 	nats, err := nats.Connect(os.Getenv("NATS_URL"))
 
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	Nats = nats
-	return nil
 }
