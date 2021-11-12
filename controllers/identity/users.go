@@ -93,7 +93,7 @@ func ReSendEmailCode(c *fiber.Ctx) error {
 
 	code.SendCode("email_confirmation", user.Language())
 
-	return c.Status(200).JSON(user.ToEntity())
+	return c.Status(200).JSON(200)
 }
 
 type VerifyEmailPayload struct {
@@ -116,7 +116,7 @@ func VerifyEmail(c *fiber.Ctx) error {
 		})
 	}
 
-	code := user.GetConfirmationCode("email", true)
+	code := user.GetConfirmationCode("email", false)
 
 	if code.Expired() || code.Validated() || code.OutAttempt() {
 		return c.Status(422).JSON(types.Error{
@@ -126,6 +126,8 @@ func VerifyEmail(c *fiber.Ctx) error {
 
 	if code.Code != params.Code {
 		code.AttemptCount++
+
+		config.Database.Save(&code)
 
 		return c.Status(422).JSON(types.Error{
 			Error: UserCodeInconrrect,
@@ -144,5 +146,5 @@ func VerifyEmail(c *fiber.Ctx) error {
 
 	code.SendCode("email_verification_successful", user.Language())
 
-	return c.Status(200).JSON(user.ToEntity())
+	return c.Status(200).JSON(200)
 }
