@@ -4,4 +4,5 @@ func InitializeConfig() {
 	NewLoggerService()
 	ConnectDatabase()
 	InitSessionStore()
+	ConnectNats()
 }
