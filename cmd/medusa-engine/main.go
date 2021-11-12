@@ -2,10 +2,10 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"github.com/anti-lgbt/medusa/config"
 	"github.com/anti-lgbt/medusa/workers/engines"
-	"github.com/nats-io/nats.go"
 )
 
 func CreateWorker(id string) engines.Worker {
@@ -26,17 +26,21 @@ func main() {
 		config.Logger.Println("Start finex-engine: " + id)
 		worker := CreateWorker(id)
 
-		config.Nats.Subscribe(id, func(m *nats.Msg) {
-			config.Logger.Infof("Receive message: %s", string(m.Data))
+		sub, _ := config.Nats.SubscribeSync("engines:" + id)
 
+		for {
+			m, err := sub.NextMsg(1 * time.Second)
+
+			if err != nil {
+				continue
+			}
+
+			config.Logger.Infof("Receive message: %s", string(m.Data))
 			if err := worker.Process(m.Data); err == nil {
 				m.Ack()
 			} else {
 				config.Logger.Errorf("Worker error: %v", err.Error())
 			}
-		})
-	}
-
-	for {
+		}
 	}
 }
