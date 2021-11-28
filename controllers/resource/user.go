@@ -9,6 +9,7 @@ import (
 	"github.com/volatiletech/null"
 
 	"github.com/anti-lgbt/medusa/config"
+	"github.com/anti-lgbt/medusa/controllers/helpers"
 	"github.com/anti-lgbt/medusa/models"
 	"github.com/anti-lgbt/medusa/services"
 	"github.com/anti-lgbt/medusa/types"
@@ -29,19 +30,25 @@ func GetUserProfile(c *fiber.Ctx) error {
 	return c.Status(200).JSON(user.ToEntity())
 }
 
+type UpdateUserPayload struct {
+	FirstName string      `json:"first_name" form:"first_name" validate:"required"`
+	LastName  string      `json:"last_name" form:"last_name" validate:"required"`
+	Bio       null.String `json:"bio" form:"bio"`
+}
+
 // PUT /api/v2/resource/users
 func UpdateUser(c *fiber.Ctx) error {
-	type Payload struct {
-		FirstName string      `json:"first_name" form:"first_name"`
-		LastName  string      `json:"last_name" form:"last_name"`
-		Bio       null.String `json:"bio" form:"bio"`
-	}
-
 	user := c.Locals("CurrentUser").(*models.User)
-	var params *Payload
-	if err := c.BodyParser(&params); err != nil {
+	params := new(UpdateUserPayload)
+	if err := c.BodyParser(params); err != nil {
 		return c.Status(500).JSON(types.Error{
 			Error: types.ServerInvalidBody,
+		})
+	}
+
+	if err := helpers.Vaildate(params, "resource.user"); err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: err.Error(),
 		})
 	}
 
@@ -76,20 +83,26 @@ func UpdateUser(c *fiber.Ctx) error {
 	return c.Status(201).JSON(201)
 }
 
+type ChangePasswordPayload struct {
+	OldPassword     string `json:"old_password" form:"old_password" validate:"required"`
+	NewPassword     string `json:"new_password" form:"new_password" validate:"required"`
+	ConfirmPassword string `json:"confirm_password" form:"confirm_password" validate:"required"`
+}
+
 // PUT /api/v2/resouce/users/password
 func UpdateUserPassword(c *fiber.Ctx) error {
-	type Payload struct {
-		OldPassword     string `json:"old_password" form:"old_password"`
-		NewPassword     string `json:"new_password" form:"new_password"`
-		ConfirmPassword string `json:"confirm_password" form:"confirm_password"`
-	}
-
 	user := c.Locals("CurrentUser").(*models.User)
 
-	var params *Payload
-	if err := c.BodyParser(&params); err != nil {
+	params := new(ChangePasswordPayload)
+	if err := c.BodyParser(params); err != nil {
 		return c.Status(500).JSON(types.Error{
 			Error: types.ServerInvalidBody,
+		})
+	}
+
+	if err := helpers.Vaildate(params, "resource.user"); err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: err.Error(),
 		})
 	}
 

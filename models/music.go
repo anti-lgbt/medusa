@@ -11,20 +11,22 @@ import (
 )
 
 type Music struct {
-	ID          int64            `json:"id" gorm:"primaryKey"`
-	UserID      int64            `json:"user_id" gorm:"type:bigint;not null;index"`
-	Name        string           `json:"name" gorm:"type:character varying;not null;index"`
-	Description sql.NullString   `json:"description" gorm:"type:character varying;not null;index"`
-	State       types.MusicState `json:"state" gorm:"type:character varying(10);not null;index"`
-	ViewCount   int64            `json:"view_count" gorm:"type:integer;not null;index;default:0"`
-	Path        string           `json:"-" gorm:"type:character varying;not null"`
-	Image       sql.NullString   `json:"-" gorm:"type:character varying"`
-	CreatedAt   time.Time        `json:"created_at" gorm:"type:timestamp(0);not null;index"`
-	UpdatedAt   time.Time        `json:"updated_at" gorm:"type:timestamp(0);not null;index"`
-	MusicAlbums []*MusicAlbum    `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	Likes       []*Like          `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	Comments    []*Comment       `json:"-" gorm:"constraint:OnDelete:CASCADE"`
-	User        *User
+	ID             int64            `json:"id" gorm:"primaryKey"`
+	UserID         int64            `json:"user_id" gorm:"type:bigint;not null;index"`
+	Name           string           `json:"name" gorm:"type:character varying;not null;index"`
+	Description    sql.NullString   `json:"description" gorm:"type:character varying;index"`
+	Author         string           `json:"author" gorm:"type:character varying;not null;index"`
+	State          types.MusicState `json:"state" gorm:"type:character varying(10);not null;index"`
+	ViewCount      int64            `json:"view_count" gorm:"type:integer;not null;index;default:0"`
+	Path           string           `json:"-" gorm:"type:character varying;not null"`
+	Image          sql.NullString   `json:"-" gorm:"type:character varying"`
+	CreatedAt      time.Time        `json:"created_at" gorm:"type:timestamp(0);not null;index"`
+	UpdatedAt      time.Time        `json:"updated_at" gorm:"type:timestamp(0);not null;index"`
+	MusicAlbums    []*MusicAlbum    `json:"-" gorm:"constraint:OnDelete:CASCADE"`
+	Likes          []*Like          `json:"-" gorm:"constraint:OnDelete:CASCADE"`
+	Comments       []*Comment       `json:"-" gorm:"constraint:OnDelete:CASCADE"`
+	TrendingMusics []*TrendingMusic `json:"-" gorm:"constraint:OnDelete:CASCADE"`
+	User           *User
 }
 
 func (m *Music) Delete() {
@@ -44,6 +46,14 @@ func (m *Music) Comment(user_id int64, content string) *Comment {
 	config.Database.Create(&comment)
 
 	return comment
+}
+
+func (m *Music) Liked(user_id int64) bool {
+	var l *Like
+
+	result := config.Database.First(&l, "user_id = ? AND music_id = ?", user_id, m.ID)
+
+	return result.Error == nil
 }
 
 func (m *Music) Like(user_id int64) error {
@@ -77,18 +87,25 @@ func (m *Music) LikeCount() int64 {
 	return count
 }
 
-func (m *Music) ToEntity() *entities.Music {
-	return &entities.Music{
+func (m *Music) ToEntity(user_id sql.NullInt64) *entities.Music {
+	entity := &entities.Music{
 		ID:   m.ID,
 		Name: m.Name,
 		Description: null.String{
 			String: m.Description.String,
 			Valid:  m.Description.Valid,
 		},
+		Author:    m.Author,
 		State:     m.State,
 		ViewCount: m.ViewCount,
 		LikeCount: m.LikeCount(),
 		CreatedAt: m.CreatedAt,
 		UpdatedAt: m.UpdatedAt,
 	}
+
+	if user_id.Valid {
+		entity.Liked = m.Liked(user_id.Int64)
+	}
+
+	return entity
 }

@@ -38,6 +38,14 @@ func (c *Comment) Reply(user_id int64, content string) *Reply {
 	return reply
 }
 
+func (c *Comment) Liked(user_id int64) bool {
+	var l *Like
+
+	result := config.Database.First(&l, "user_id = ? AND music_id = ?", user_id, c.ID)
+
+	return result.Error == nil
+}
+
 func (c *Comment) Like(user_id int64) error {
 	var l *Like
 
@@ -69,18 +77,18 @@ func (c *Comment) LikeCount() int64 {
 	return count
 }
 
-func (c *Comment) ToEntity() *entities.Comment {
+func (c *Comment) ToEntity(user_id sql.NullInt64) *entities.Comment {
 	var replies []*Reply
 
-	config.Database.Find(&replies, "comment_id = ?", c.ID)
+	config.Database.Order("id ASC").Find(&replies, "comment_id = ?", c.ID)
 
 	reply_entities := make([]*entities.Reply, 0)
 
 	for _, reply := range replies {
-		reply_entities = append(reply_entities, reply.ToEntity())
+		reply_entities = append(reply_entities, reply.ToEntity(user_id))
 	}
 
-	return &entities.Comment{
+	entity := &entities.Comment{
 		ID:        c.ID,
 		Content:   c.Content,
 		LikeCount: c.LikeCount(),
@@ -88,4 +96,10 @@ func (c *Comment) ToEntity() *entities.Comment {
 		CreatedAt: c.CreatedAt,
 		UpdatedAt: c.UpdatedAt,
 	}
+
+	if user_id.Valid {
+		entity.Liked = c.Liked(user_id.Int64)
+	}
+
+	return entity
 }

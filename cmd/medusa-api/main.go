@@ -28,6 +28,7 @@ func main() {
 		&models.Reply{},
 		&models.Like{},
 		&models.Code{},
+		&models.TrendingMusic{},
 	)
 
 	r := routes.SetupRouter()

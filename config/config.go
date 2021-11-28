@@ -5,4 +5,5 @@ func InitializeConfig() {
 	ConnectDatabase()
 	InitSessionStore()
 	ConnectNats()
+	InitValidator()
 }

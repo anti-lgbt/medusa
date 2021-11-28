@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"encoding/base64"
+	"errors"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
@@ -13,20 +14,39 @@ import (
 	"github.com/anti-lgbt/medusa/types"
 )
 
-func IsAuth(c *fiber.Ctx) error {
+func MustAuth(c *fiber.Ctx) error {
 	session, err := config.SessionStore.Get(c)
 
+	user, err := IsAuth(c)
+	if err != nil {
+		return c.Status(401).JSON(types.Error{
+			Error: err.Error(),
+		})
+	}
+
+	jwt_token, err := helpers.GenerateJWT(user)
 	if err != nil {
 		return c.Status(401).JSON(types.Error{
 			Error: types.AuthzInvalidSession,
 		})
 	}
 
+	session.Set("jwt", jwt_token)
+	c.Locals("CurrentUser", user)
+
+	return c.Next()
+}
+
+func IsAuth(c *fiber.Ctx) (*models.User, error) {
+	session, err := config.SessionStore.Get(c)
+
+	if err != nil {
+		return nil, errors.New(types.AuthzInvalidSession)
+	}
+
 	jwt_token := session.Get("jwt")
 	if jwt_token == nil {
-		return c.Status(401).JSON(types.Error{
-			Error: types.AuthzInvalidSession,
-		})
+		return nil, errors.New(types.AuthzInvalidSession)
 	}
 
 	token, err := jwt.Parse(jwt_token.(string), func(t *jwt.Token) (interface{}, error) {
@@ -40,9 +60,7 @@ func IsAuth(c *fiber.Ctx) error {
 		return jwt_private_key, nil
 	})
 	if err != nil {
-		return c.Status(401).JSON(types.Error{
-			Error: types.JWTDecodeAndVerify,
-		})
+		return nil, errors.New(types.JWTDecodeAndVerify)
 	}
 
 	claims := token.Claims.(jwt.MapClaims)
@@ -51,20 +69,8 @@ func IsAuth(c *fiber.Ctx) error {
 	var user *models.User
 	if result := config.Database.First(&user, "email = ?", email); result.Error != nil {
 		session.Destroy()
-		return c.Status(401).JSON(types.Error{
-			Error: types.AuthzInvalidSession,
-		})
+		return nil, errors.New(types.AuthzInvalidSession)
 	}
 
-	jwt_token, err = helpers.GenerateJWT(user)
-	if err != nil {
-		return c.Status(401).JSON(types.Error{
-			Error: types.AuthzInvalidSession,
-		})
-	}
-
-	session.Set("jwt", jwt_token)
-	c.Locals("CurrentUser", user)
-
-	return c.Next()
+	return user, nil
 }

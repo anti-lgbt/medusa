@@ -2,6 +2,7 @@ package identity
 
 import (
 	"github.com/anti-lgbt/medusa/config"
+	"github.com/anti-lgbt/medusa/controllers/helpers"
 	"github.com/anti-lgbt/medusa/models"
 	"github.com/anti-lgbt/medusa/services"
 	"github.com/anti-lgbt/medusa/types"
@@ -16,16 +17,22 @@ const (
 )
 
 type RegisterPayload struct {
-	FirstName string `json:"first_name" form:"first_name"`
-	LastName  string `json:"last_name" form:"last_name"`
+	FirstName string `json:"first_name" form:"first_name" validate:"required"`
+	LastName  string `json:"last_name" form:"last_name" validate:"required"`
 	LoginPayload
 }
 
 func Register(c *fiber.Ctx) error {
-	var params *RegisterPayload
-	if err := c.BodyParser(&params); err != nil {
+	params := new(RegisterPayload)
+	if err := c.BodyParser(params); err != nil {
 		return c.Status(500).JSON(types.Error{
 			Error: types.ServerInvalidBody,
+		})
+	}
+
+	if err := helpers.Vaildate(params, "identity.user"); err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: err.Error(),
 		})
 	}
 
@@ -67,6 +74,23 @@ func Register(c *fiber.Ctx) error {
 
 	code.SendCode("email_confirmation", user.Language())
 
+	session, err := config.SessionStore.Get(c)
+	if err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: UserInvalid,
+		})
+	}
+
+	jwt_token, err := helpers.GenerateJWT(user)
+	if err != nil {
+		return c.Status(401).JSON(types.Error{
+			Error: types.AuthzInvalidSession,
+		})
+	}
+
+	session.Set("jwt", jwt_token)
+	session.Save()
+
 	return c.Status(201).JSON(user.ToEntity())
 }
 
@@ -75,8 +99,8 @@ type ResendEmailCode struct {
 }
 
 func ReSendEmailCode(c *fiber.Ctx) error {
-	var params ResendEmailCode
-	if err := c.BodyParser(&params); err != nil {
+	params := new(ResendEmailCode)
+	if err := c.BodyParser(params); err != nil {
 		return c.Status(500).JSON(types.Error{
 			Error: types.ServerInvalidBody,
 		})
@@ -97,15 +121,21 @@ func ReSendEmailCode(c *fiber.Ctx) error {
 }
 
 type VerifyEmailPayload struct {
-	Email string `json:"email" form:"email"`
-	Code  string `json:"code" form:"code"`
+	Email string `json:"email" form:"email" validate:"required|email"`
+	Code  string `json:"code" form:"code" validate:"required"`
 }
 
 func VerifyEmail(c *fiber.Ctx) error {
-	var params *VerifyEmailPayload
-	if err := c.BodyParser(&params); err != nil {
+	params := new(VerifyEmailPayload)
+	if err := c.BodyParser(params); err != nil {
 		return c.Status(500).JSON(types.Error{
 			Error: types.ServerInvalidBody,
+		})
+	}
+
+	if err := helpers.Vaildate(params, "identity.user"); err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: err.Error(),
 		})
 	}
 
@@ -144,6 +174,23 @@ func VerifyEmail(c *fiber.Ctx) error {
 	config.Database.Save(&user)
 
 	code.SendCode("email_verification_successful", user.Language())
+
+	session, err := config.SessionStore.Get(c)
+	if err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: UserInvalid,
+		})
+	}
+
+	jwt_token, err := helpers.GenerateJWT(user)
+	if err != nil {
+		return c.Status(401).JSON(types.Error{
+			Error: types.AuthzInvalidSession,
+		})
+	}
+
+	session.Set("jwt", jwt_token)
+	session.Save()
 
 	return c.Status(200).JSON(200)
 }

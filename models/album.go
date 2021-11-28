@@ -14,7 +14,6 @@ type Album struct {
 	UserID      int64          `json:"user_id" gorm:"type:bigint;not null;index"`
 	Name        string         `json:"name" gorm:"type:character varying;not null;index"`
 	Description sql.NullString `json:"description" gorm:"type:character varying;index"`
-	Private     bool           `json:"private" gorm:"type:boolean;not null;index"`
 	ViewCount   int64          `json:"view_count" gorm:"type:integer;not null;index;default:0"`
 	Image       sql.NullString `json:"-" gorm:"type:character varying"`
 	CreatedAt   time.Time      `json:"created_at" gorm:"type:timestamp(0);not null;index"`
@@ -52,6 +51,14 @@ func (a *Album) Delete() {
 	config.Database.Delete(&a)
 }
 
+func (a *Album) Liked(user_id int64) bool {
+	var l *Like
+
+	result := config.Database.First(&l, "user_id = ? AND album_id = ?", user_id, a.ID)
+
+	return result.Error == nil
+}
+
 func (a *Album) Like(user_id int64) error {
 	var l *Like
 
@@ -83,26 +90,31 @@ func (a *Album) LikeCount() int64 {
 	return count
 }
 
-func (a *Album) ToEntity() *entities.Album {
+func (a *Album) ToEntity(user_id sql.NullInt64) *entities.Album {
 	musics := a.Musics()
 	music_entities := make([]*entities.Music, 0)
 
 	for _, music := range musics {
-		music_entities = append(music_entities, music.ToEntity())
+		music_entities = append(music_entities, music.ToEntity(user_id))
 	}
 
-	return &entities.Album{
+	entity := &entities.Album{
 		ID:   a.ID,
 		Name: a.Name,
 		Description: null.String{
 			String: a.Description.String,
 			Valid:  a.Description.Valid,
 		},
-		Private:   a.Private,
 		ViewCount: a.ViewCount,
 		LikeCount: a.LikeCount(),
 		Musics:    music_entities,
 		CreatedAt: a.CreatedAt,
 		UpdatedAt: a.UpdatedAt,
 	}
+
+	if user_id.Valid {
+		entity.Liked = a.Liked(user_id.Int64)
+	}
+
+	return entity
 }

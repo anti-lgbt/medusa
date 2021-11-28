@@ -25,5 +25,6 @@ jobs:
       run: |
         go build -o medusa-api ./cmd/medusa-api/main.go
         go build -o medusa-engine ./cmd/medusa-engine/main.go
+        go build -o medusa-daemon ./cmd/medusa-daemon/main.go
     - name: Test
       run: go test -v ./...

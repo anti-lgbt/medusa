@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func IsCollaborator(c *fiber.Ctx) error {
+func MustCollaborator(c *fiber.Ctx) error {
 	user := c.Locals("CurrentUser").(*models.User)
 
 	for _, role := range []types.UserRole{types.UserRoleSinger, types.UserRoleMusician, types.UserRoleAdmin} {

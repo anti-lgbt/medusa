@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func IsAdmin(c *fiber.Ctx) error {
+func MustAdmin(c *fiber.Ctx) error {
 	user := c.Locals("CurrentUser").(*models.User)
 
 	if user.Role != types.UserRoleAdmin {

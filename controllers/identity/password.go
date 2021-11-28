@@ -2,6 +2,7 @@ package identity
 
 import (
 	"github.com/anti-lgbt/medusa/config"
+	"github.com/anti-lgbt/medusa/controllers/helpers"
 	"github.com/anti-lgbt/medusa/models"
 	"github.com/anti-lgbt/medusa/services"
 	"github.com/anti-lgbt/medusa/types"
@@ -16,13 +17,19 @@ const (
 
 func GenerateCodeResetPassword(c *fiber.Ctx) error {
 	type Payload struct {
-		Email string `json:"email" form:"email"`
+		Email string `json:"email" form:"email" validate:"required|email"`
 	}
 
 	params := new(Payload)
-	if c.BodyParser(&params) != nil {
+	if c.BodyParser(params) != nil {
 		return c.Status(500).JSON(types.Error{
 			Error: types.ServerInvalidBody,
+		})
+	}
+
+	if err := helpers.Vaildate(params, "identity.password"); err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: err.Error(),
 		})
 	}
 
@@ -42,14 +49,20 @@ func GenerateCodeResetPassword(c *fiber.Ctx) error {
 
 func CheckCodeResetPassword(c *fiber.Ctx) error {
 	type Payload struct {
-		Email string `json:"email" form:"email"`
-		Code  string `json:"code" form:"code"`
+		Email string `json:"email" form:"email" validate:"required|email"`
+		Code  string `json:"code" form:"code" validate:"required"`
 	}
 
 	params := new(Payload)
-	if c.BodyParser(&params) != nil {
+	if c.BodyParser(params) != nil {
 		return c.Status(500).JSON(types.Error{
 			Error: types.ServerInvalidBody,
+		})
+	}
+
+	if err := helpers.Vaildate(params, "identity.password"); err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: err.Error(),
 		})
 	}
 
@@ -82,16 +95,22 @@ func CheckCodeResetPassword(c *fiber.Ctx) error {
 
 func ResetPassword(c *fiber.Ctx) error {
 	type Payload struct {
-		Email           string `json:"email" form:"email"`
-		Code            string `json:"code" form:"code"`
-		Password        string `json:"password" form:"password"`
-		ConfirmPassword string `json:"confirm_password" form:"confirm_password"`
+		Email           string `json:"email" form:"email" validate:"required|email"`
+		Code            string `json:"code" form:"code" validate:"required"`
+		Password        string `json:"password" form:"password" validate:"required"`
+		ConfirmPassword string `json:"confirm_password" form:"confirm_password" validate:"required"`
 	}
 
 	params := new(Payload)
-	if c.BodyParser(&params) != nil {
+	if c.BodyParser(params) != nil {
 		return c.Status(500).JSON(types.Error{
 			Error: types.ServerInvalidBody,
+		})
+	}
+
+	if err := helpers.Vaildate(params, "identity.password"); err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: err.Error(),
 		})
 	}
 

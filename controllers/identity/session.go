@@ -18,15 +18,21 @@ const (
 )
 
 type LoginPayload struct {
-	Email    string `json:"email" form:"email"`
-	Password string `json:"password" form:"password"`
+	Email    string `json:"email" form:"email" validate:"required|email"`
+	Password string `json:"password" form:"password" validate:"required"`
 }
 
 func Login(c *fiber.Ctx) error {
-	var params *LoginPayload
-	if err := c.BodyParser(&params); err != nil {
+	params := new(LoginPayload)
+	if err := c.BodyParser(params); err != nil {
 		return c.Status(500).JSON(types.Error{
 			Error: types.ServerInvalidBody,
+		})
+	}
+
+	if err := helpers.Vaildate(params, "identity.session"); err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: err.Error(),
 		})
 	}
 
@@ -77,4 +83,18 @@ func Login(c *fiber.Ctx) error {
 	services.SendEmail("email_verification_successful", user.Email, user.Language(), nil)
 
 	return c.Status(200).JSON(user.ToEntity())
+}
+
+func Logout(c *fiber.Ctx) error {
+	session, err := config.SessionStore.Get(c)
+	if err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: UserInvalid,
+		})
+	}
+
+	session.Destroy()
+	session.Save()
+
+	return c.Status(200).JSON(200)
 }

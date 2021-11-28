@@ -1,7 +1,10 @@
 package resource
 
 import (
+	"database/sql"
+
 	"github.com/anti-lgbt/medusa/config"
+	"github.com/anti-lgbt/medusa/controllers/helpers"
 	"github.com/anti-lgbt/medusa/models"
 	"github.com/anti-lgbt/medusa/types"
 	"github.com/gofiber/fiber/v2"
@@ -85,7 +88,18 @@ func CreateReply(c *fiber.Ctx) error {
 		Content   string `json:"content"`
 	}
 
-	var params *Payload
+	params := new(Payload)
+	if err := c.BodyParser(params); err != nil {
+		return c.Status(500).JSON(types.Error{
+			Error: types.ServerInvalidBody,
+		})
+	}
+
+	if err := helpers.Vaildate(params, "resource.comment"); err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: err.Error(),
+		})
+	}
 
 	reply := &models.Reply{
 		UserID:    user.ID,
@@ -95,7 +109,10 @@ func CreateReply(c *fiber.Ctx) error {
 
 	config.Database.Create(&reply)
 
-	return c.Status(201).JSON(reply.ToEntity())
+	return c.Status(201).JSON(reply.ToEntity(sql.NullInt64{
+		Int64: user.ID,
+		Valid: true,
+	}))
 }
 
 // DELETE /api/v2/resource/comments/reply/:id

@@ -1,39 +1,57 @@
 package routes
 
 import (
+	"github.com/anti-lgbt/medusa/controllers/admin"
 	"github.com/anti-lgbt/medusa/controllers/identity"
 	"github.com/anti-lgbt/medusa/controllers/public"
 	"github.com/anti-lgbt/medusa/controllers/resource"
 	"github.com/anti-lgbt/medusa/routes/middlewares"
 	"github.com/gofiber/fiber/v2"
 
+	fiberSwagger "github.com/arsmn/fiber-swagger/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 func SetupRouter() *fiber.App {
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		BodyLimit: 20 * 1024 * 1024, // this is the default limit of 4MB
+	})
 	app.Use(logger.New())
+
+	app.Get("/api/v2/swagger/*", fiberSwagger.Handler)
 
 	api_public := app.Group("/api/v2/public")
 	{
 		api_public.Get("time", public.GetTime)
-		api_public.Get("/musics/:id", public.GetMusic)
-		api_public.Get("/musics/:id/image", public.GetMusicImage)
-		api_public.Get("/musics/:id/audio", public.GetMusicAudio)
-		api_public.Get("/albums/:id", public.GetAlbum)
-		api_public.Get("/albums/:id/image", public.GetAlbumImage)
+
+		api_public_musics := api_public.Group("/musics")
+		{
+			api_public_musics.Get("/", public.GetMusics)
+			api_public_musics.Get("/:id", public.GetMusic)
+			api_public_musics.Get("/:id/image", public.GetMusicImage)
+			api_public_musics.Get("/:id/audio", public.GetMusicAudio)
+			api_public_musics.Get("/:id/comments", public.GetMusicComments)
+		}
+
+		api_public_albums := api_public.Group("/albums")
+		{
+			api_public_albums.Get("/:id", public.GetAlbum)
+			api_public_albums.Get("/:id/image", public.GetAlbumImage)
+			api_public_albums.Get("/:id/comments", public.GetAlbumComments)
+		}
+
 		api_public.Get("/users/:id/avatar", public.GetUserAvatar)
 	}
 
-	api_resource := app.Group("/api/v2/resource", middlewares.IsAuth)
+	api_resource := app.Group("/api/v2/resource", middlewares.MustAuth)
 	{
-		api_resource_musics := api_resource.Group("/musics", middlewares.IsCollaborator)
+		api_resource_musics := api_resource.Group("/musics", middlewares.MustCollaborator)
 		{
 			api_resource_musics.Get("/", resource.GetMusics)
 			api_resource_musics.Get("/:id", resource.GetMusic)
 			api_resource_musics.Post("/", resource.CreateMusic)
 			api_resource_musics.Put("/", resource.UpdateMusic)
-			api_resource_musics.Delete("/", resource.DeleteMusic)
+			api_resource_musics.Delete("/:id", resource.DeleteMusic)
 			api_resource_musics.Post("/:id/like", resource.LikeMusic)
 			api_resource_musics.Post("/:id/unlike", resource.UnLikeMusic)
 			api_resource_musics.Post("/:id/comment", resource.CommentMusic)
@@ -44,8 +62,8 @@ func SetupRouter() *fiber.App {
 			api_resource_albums.Get("/", resource.GetAlbums)
 			api_resource_albums.Get("/:id", resource.GetAlbum)
 			api_resource_albums.Post("/", resource.CreateAlbum)
-			api_resource_albums.Put("/", resource.UpdateAlbum)
-			api_resource_albums.Delete("/", resource.DeleteAlbum)
+			api_resource_albums.Put("/:id", resource.UpdateAlbum)
+			api_resource_albums.Delete("/:id", resource.DeleteAlbum)
 			api_resource_albums.Post("/:id/like", resource.LikeAlbum)
 			api_resource_albums.Post("/:id/unlike", resource.UnLikeAlbum)
 			api_resource_albums.Post("/:id/comment", resource.CommentAlbum)
@@ -74,23 +92,30 @@ func SetupRouter() *fiber.App {
 		}
 	}
 
-	api_identity := app.Group("/api/v2/identity", middlewares.IsGuest)
+	api_identity := app.Group("/api/v2/identity")
 	{
-		api_identity.Post("/session", identity.Login)
+		api_identity.Post("/session", middlewares.MustGuest, identity.Login)
+		api_identity.Delete("/session", middlewares.MustAuth, identity.Logout)
 
-		api_identity.Post("/users", identity.Register)
+		api_identity.Post("/users", middlewares.MustGuest, identity.Register)
 		api_identity.Post("/users/generate_code", identity.ReSendEmailCode)
 		api_identity.Post("/users/confirm_code", identity.VerifyEmail)
 
-		api_identity.Post("/password/generate_code", identity.GenerateCodeResetPassword)
-		api_identity.Post("/password/check_code", identity.CheckCodeResetPassword)
-		api_identity.Post("/password/reset_password", identity.ResetPassword)
+		api_identity.Post("/password/generate_code", middlewares.MustGuest, identity.GenerateCodeResetPassword)
+		api_identity.Post("/password/check_code", middlewares.MustGuest, identity.CheckCodeResetPassword)
+		api_identity.Post("/password/reset_password", middlewares.MustGuest, identity.ResetPassword)
 	}
 
-	// api_admin := app.Group("/api/v2/admin", middlewares.IsAdmin)
-	// {
-
-	// }
+	api_admin := app.Group("/api/v2/admin", middlewares.MustAuth, middlewares.MustAdmin)
+	{
+		api_admin_users := api_admin.Group("/users")
+		{
+			api_admin_users.Get("/", admin.GetUsers)
+			api_admin_users.Get("/:uid", admin.GetUser)
+			api_admin_users.Put("/:uid", admin.UpdateUser)
+			api_admin_users.Delete("/:uid", admin.DeleteUser)
+		}
+	}
 
 	return app
 }

@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/creasty/defaults"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/volatiletech/null"
 
 	"github.com/anti-lgbt/medusa/config"
 	"github.com/anti-lgbt/medusa/controllers/entities"
+	"github.com/anti-lgbt/medusa/controllers/helpers"
 	"github.com/anti-lgbt/medusa/controllers/queries"
 	"github.com/anti-lgbt/medusa/models"
 	"github.com/anti-lgbt/medusa/services"
@@ -18,20 +20,19 @@ import (
 )
 
 type AlbumPayload struct {
-	ID          int64       `json:"id" form:"id"`
-	Name        string      `json:"name" form:"name"`
+	Name        string      `json:"name" form:"name" validate:"required"`
 	Description null.String `json:"description" form:"description"`
-	Private     bool        `json:"private" form:"private"`
-	Musics      []int64     `json:"music" form:"music"`
+	Musics      []int64     `json:"music" form:"music" validate:"required" default:"[]"`
 }
 
 // GET /api/v2/resource/albums
 func GetAlbums(c *fiber.Ctx) error {
 	type Payload struct {
 		queries.Pagination
+		queries.Period
+		queries.Order
 	}
 
-	var albums []*models.Album
 	var params = new(Payload)
 	if c.QueryParser(params) != nil {
 		return c.Status(500).JSON(types.Error{
@@ -39,14 +40,31 @@ func GetAlbums(c *fiber.Ctx) error {
 		})
 	}
 
+	defaults.Set(params)
+
+	if err := helpers.Vaildate(params, "resource.album"); err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: err.Error(),
+		})
+	}
+
 	user := c.Locals("CurrentUser").(*models.User)
 
-	config.Database.Find(&albums, "user_id = ?", user.ID).Offset(params.Page*params.Limit - params.Limit).Limit(params.Limit)
+	tx := config.Database
+	tx = queries.QueryPagination(tx, params.Limit, params.Page)
+	tx = queries.QueryOrder(tx, params.OrderBy, params.Ordering)
+	tx = queries.QueryPeriod(tx, params.TimeFrom, params.TimeTo)
+
+	var albums []*models.Album
+	tx.Find(&albums, "user_id = ?", user.ID)
 
 	album_entities := make([]*entities.Album, 0)
 
 	for _, album := range albums {
-		album_entities = append(album_entities, album.ToEntity())
+		album_entities = append(album_entities, album.ToEntity(sql.NullInt64{
+			Int64: user.ID,
+			Valid: true,
+		}))
 	}
 
 	return c.Status(200).JSON(album_entities)
@@ -70,33 +88,34 @@ func GetAlbum(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(200).JSON(album.ToEntity())
+	return c.Status(200).JSON(album.ToEntity(sql.NullInt64{
+		Int64: user.ID,
+		Valid: true,
+	}))
 }
 
 // POST /api/v2/resource/albums
 func CreateAlbum(c *fiber.Ctx) error {
 	user := c.Locals("CurrentUser").(*models.User)
 
-	var params *AlbumPayload
-	if err := c.BodyParser(&params); err != nil {
+	params := new(AlbumPayload)
+	if err := c.BodyParser(params); err != nil {
 		return c.Status(500).JSON(types.Error{
 			Error: types.ServerInvalidBody,
+		})
+	}
+
+	defaults.Set(params)
+
+	if err := helpers.Vaildate(params, "resource.album"); err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: err.Error(),
 		})
 	}
 
 	music_albums := make([]*models.MusicAlbum, 0)
 
 	for _, music_id := range params.Musics {
-		if !params.Private {
-			var music *models.Music
-
-			if result := config.Database.First(&music, "id = ? AND private = ?", music_id, true); result.Error != nil {
-				return c.Status(404).JSON(types.Error{
-					Error: types.RecordNotFound,
-				})
-			}
-		}
-
 		music_albums = append(music_albums, &models.MusicAlbum{
 			MusicID: music_id,
 		})
@@ -109,7 +128,6 @@ func CreateAlbum(c *fiber.Ctx) error {
 			String: params.Description.String,
 			Valid:  params.Description.Valid,
 		},
-		Private:     params.Private,
 		ViewCount:   0,
 		MusicAlbums: music_albums,
 	}
@@ -131,20 +149,39 @@ func CreateAlbum(c *fiber.Ctx) error {
 
 	config.Database.Create(&album)
 
-	return c.Status(201).JSON(album.ToEntity())
+	return c.Status(201).JSON(album.ToEntity(sql.NullInt64{
+		Int64: user.ID,
+		Valid: true,
+	}))
 }
 
-// PUT /api/v2/resource/albums
+// PUT /api/v2/resource/albums/:id
 func UpdateAlbum(c *fiber.Ctx) error {
-	var params *AlbumPayload
-	if err := c.BodyParser(&params); err != nil {
+	user := c.Locals("CurrentUser").(*models.User)
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(500).JSON(types.Error{
+			Error: types.ServerInvalidQuery,
+		})
+	}
+
+	params := new(AlbumPayload)
+	if err := c.BodyParser(params); err != nil {
 		return c.Status(500).JSON(types.Error{
 			Error: types.ServerInvalidBody,
 		})
 	}
 
+	defaults.Set(params)
+
+	if err := helpers.Vaildate(params, "resource.album"); err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: err.Error(),
+		})
+	}
+
 	var album *models.Album
-	if result := config.Database.First(&album, params.ID); result.Error != nil {
+	if result := config.Database.First(&album, id); result.Error != nil {
 		return c.Status(404).JSON(types.Error{
 			Error: types.RecordNotFound,
 		})
@@ -155,7 +192,6 @@ func UpdateAlbum(c *fiber.Ctx) error {
 		String: params.Description.String,
 		Valid:  params.Description.Valid,
 	}
-	album.Private = params.Private
 
 	file_header, err := c.FormFile("image")
 	if err == nil {
@@ -172,25 +208,15 @@ func UpdateAlbum(c *fiber.Ctx) error {
 		}
 	}
 
-	config.Database.Delete(models.MusicAlbum{}, "album_id = ? AND music_id NOT IN (?)", params.ID, params.Musics)
+	config.Database.Delete(models.MusicAlbum{}, "album_id = ? AND music_id NOT IN (?)", id, params.Musics)
 
 	for _, music_id := range params.Musics {
-		if !params.Private {
-			var music *models.Music
-
-			if result := config.Database.First(&music, "id = ? AND private = ?", music_id, true); result.Error != nil {
-				return c.Status(404).JSON(types.Error{
-					Error: types.RecordNotFound,
-				})
-			}
-		}
-
 		var music_album *models.MusicAlbum
 
-		if result := config.Database.First(&music_album, "album_id = ? AND music_id = ?", params.ID, music_id); result.Error != nil {
+		if result := config.Database.First(&music_album, "album_id = ? AND music_id = ?", id, music_id); result.Error != nil {
 			music_album = &models.MusicAlbum{
 				MusicID: music_id,
-				AlbumID: params.ID,
+				AlbumID: int64(id),
 			}
 
 			config.Database.Create(&music_album)
@@ -199,7 +225,10 @@ func UpdateAlbum(c *fiber.Ctx) error {
 
 	config.Database.Save(&album)
 
-	return c.Status(201).JSON(album.ToEntity())
+	return c.Status(201).JSON(album.ToEntity(sql.NullInt64{
+		Int64: user.ID,
+		Valid: true,
+	}))
 }
 
 // POST /api/v2/resource/albums/:id/fork
@@ -232,7 +261,6 @@ func ForkAlbum(c *fiber.Ctx) error {
 		UserID:      user.ID,
 		Name:        source_album.Name,
 		Description: source_album.Description,
-		Private:     false,
 		ViewCount:   0,
 		MusicAlbums: music_albums,
 		Image:       source_album.Image,
@@ -240,7 +268,10 @@ func ForkAlbum(c *fiber.Ctx) error {
 
 	config.Database.Create(&album)
 
-	return c.Status(201).JSON(album.ToEntity())
+	return c.Status(201).JSON(album.ToEntity(sql.NullInt64{
+		Int64: user.ID,
+		Valid: true,
+	}))
 }
 
 // DELETE /api/v2/resource/albums/:id
@@ -318,8 +349,8 @@ func CommentAlbum(c *fiber.Ctx) error {
 
 	user := c.Locals("CurrentUser").(*models.User)
 
-	var params *Payload
-	if err := c.BodyParser(&params); err != nil {
+	params := new(Payload)
+	if err := c.BodyParser(params); err != nil {
 		return c.Status(500).JSON(types.Error{
 			Error: types.ServerInvalidBody,
 		})
@@ -341,5 +372,8 @@ func CommentAlbum(c *fiber.Ctx) error {
 
 	comment := album.Comment(user.ID, params.Content)
 
-	return c.Status(200).JSON(comment.ToEntity())
+	return c.Status(200).JSON(comment.ToEntity(sql.NullInt64{
+		Int64: user.ID,
+		Valid: true,
+	}))
 }

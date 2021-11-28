@@ -7,10 +7,12 @@ import (
 
 	"github.com/anti-lgbt/medusa/config"
 	"github.com/anti-lgbt/medusa/controllers/admin/entities"
+	"github.com/anti-lgbt/medusa/controllers/helpers"
 	"github.com/anti-lgbt/medusa/controllers/queries"
 	"github.com/anti-lgbt/medusa/models"
 	"github.com/anti-lgbt/medusa/services"
 	"github.com/anti-lgbt/medusa/types"
+	"github.com/creasty/defaults"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/volatiletech/null"
@@ -38,21 +40,29 @@ func UserToEntity(user *models.User) *entities.User {
 	}
 }
 
+type GetUserPayload struct {
+	State types.UserState `json:"state" validate:"userState"`
+	Role  types.UserRole  `json:"role" validate:"userRole"`
+	queries.Pagination
+	queries.Period
+	queries.Order
+}
+
 func GetUsers(c *fiber.Ctx) error {
 	var users []*models.User
 
-	type Payload struct {
-		State types.UserState `json:"state"`
-		Role  types.UserRole  `json:"role"`
-		queries.Pagination
-		queries.Period
-		queries.Order
-	}
-
-	var params *Payload
-	if c.QueryParser(&params) != nil {
+	params := new(GetUserPayload)
+	if c.QueryParser(params) != nil {
 		return c.Status(500).JSON(types.Error{
 			Error: types.ServerInvalidQuery,
+		})
+	}
+
+	defaults.Set(params)
+
+	if err := helpers.Vaildate(params, "admin.user"); err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: err.Error(),
 		})
 	}
 
@@ -82,8 +92,9 @@ func GetUsers(c *fiber.Ctx) error {
 
 // Get /api/v2/admin/users/:uid
 func GetUser(c *fiber.Ctx) error {
-	var user *models.User
 	uid := c.Params("uid")
+
+	var user *models.User
 	if result := config.Database.First(&user, "uid = ?", uid); result.Error != nil {
 		return c.Status(404).JSON(types.Error{
 			Error: types.RecordNotFound,
@@ -93,20 +104,26 @@ func GetUser(c *fiber.Ctx) error {
 	return c.Status(201).JSON(UserToEntity(user))
 }
 
+type UpdateUserPayload struct {
+	FirstName string          `json:"first_name" form:"first_name" validate:"required"`
+	LastName  string          `json:"last_name" form:"last_name" validate:"required"`
+	Bio       null.String     `json:"bio" form:"bio"`
+	State     types.UserState `json:"state" form:"state" validate:"userState|required"`
+	Role      types.UserRole  `json:"role" form:"role" validate:"userRole|required"`
+}
+
 // PUT /api/v2/admin/users/:uid
 func UpdateUser(c *fiber.Ctx) error {
-	type Payload struct {
-		FirstName string          `json:"first_name" form:"first_name"`
-		LastName  string          `json:"last_name" form:"last_name"`
-		Bio       null.String     `json:"bio" form:"bio"`
-		State     types.UserState `json:"state" form:"state"`
-		Role      types.UserRole  `json:"role" form:"role"`
-	}
-
-	var params *Payload
-	if err := c.BodyParser(&params); err != nil {
+	params := new(UpdateUserPayload)
+	if err := c.BodyParser(params); err != nil {
 		return c.Status(500).JSON(types.Error{
 			Error: types.ServerInvalidBody,
+		})
+	}
+
+	if err := helpers.Vaildate(params, "admin.user"); err != nil {
+		return c.Status(422).JSON(types.Error{
+			Error: err.Error(),
 		})
 	}
 
@@ -149,4 +166,19 @@ func UpdateUser(c *fiber.Ctx) error {
 	config.Database.Save(&user)
 
 	return c.Status(201).JSON(UserToEntity(user))
+}
+
+// DELETE /api/v2/admin/users/:uid
+func DeleteUser(c *fiber.Ctx) error {
+	var user *models.User
+	uid := c.Params("uid")
+	if result := config.Database.First(&user, "uid = ?", uid); result.Error != nil {
+		return c.Status(404).JSON(types.Error{
+			Error: types.RecordNotFound,
+		})
+	}
+
+	config.Database.Delete(&user)
+
+	return c.Status(200).JSON(200)
 }

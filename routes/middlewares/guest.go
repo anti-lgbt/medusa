@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func IsGuest(c *fiber.Ctx) error {
+func MustGuest(c *fiber.Ctx) error {
 	session, err := config.SessionStore.Get(c)
 
 	if err != nil {
@@ -16,11 +16,11 @@ func IsGuest(c *fiber.Ctx) error {
 	}
 
 	jwt := session.Get("jwt")
-	if jwt != nil {
-		return c.Status(422).JSON(types.Error{
-			Error: "authz.guest_only",
-		})
+	if jwt == nil {
+		return c.Next()
 	}
 
-	return c.Next()
+	return c.Status(422).JSON(types.Error{
+		Error: "authz.guest_only",
+	})
 }

@@ -24,6 +24,14 @@ func (r *Reply) Delete() {
 	config.Database.Delete(&r)
 }
 
+func (r *Reply) Liked(user_id int64) bool {
+	var l *Like
+
+	result := config.Database.First(&l, "user_id = ? AND reply_id = ?", user_id, r.ID)
+
+	return result.Error == nil
+}
+
 func (r *Reply) Like(user_id int64) error {
 	var l *Like
 
@@ -55,12 +63,18 @@ func (r *Reply) LikeCount() int64 {
 	return count
 }
 
-func (r *Reply) ToEntity() *entities.Reply {
-	return &entities.Reply{
+func (r *Reply) ToEntity(user_id sql.NullInt64) *entities.Reply {
+	entity := &entities.Reply{
 		ID:        r.ID,
 		Content:   r.Content,
 		LikeCount: r.LikeCount(),
 		CreatedAt: r.CreatedAt,
 		UpdatedAt: r.UpdatedAt,
 	}
+
+	if user_id.Valid {
+		entity.Liked = r.Liked(user_id.Int64)
+	}
+
+	return entity
 }
